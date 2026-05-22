@@ -1,0 +1,2172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>지구온난화로부터 우리 도시를 지켜라</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #162338;
+      --muted: #52637a;
+      --line: #21344c;
+      --panel: #fff9e9;
+      --paper: #fffef8;
+      --sky: #aee8ff;
+      --grass: #3eaa72;
+      --sun: #ffca54;
+      --mint: #27b48f;
+      --blue: #297ad6;
+      --red: #d24a3c;
+      --gold: #f4a739;
+      --shadow: rgba(22, 35, 56, 0.2);
+      font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, #8ddcff 0%, #d9f5ff 33%, #7dd08f 33.2%, #4ca467 100%);
+    }
+
+    button,
+    input,
+    textarea {
+      color: inherit;
+      font: inherit;
+    }
+
+    button {
+      min-height: 46px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      color: #fffaf0;
+      font-weight: 900;
+      cursor: pointer;
+      background: var(--blue);
+      box-shadow: 0 4px 0 #18508d;
+    }
+
+    button:disabled {
+      color: #556478;
+      cursor: not-allowed;
+      background: #c8d2dc;
+      box-shadow: none;
+    }
+
+    button.secondary {
+      color: var(--ink);
+      background: #fff0b9;
+      box-shadow: 0 4px 0 #cf9731;
+    }
+
+    button.good {
+      background: var(--mint);
+      box-shadow: 0 4px 0 #16806a;
+    }
+
+    .fullscreen-toggle {
+      position: fixed;
+      z-index: 20;
+      top: 18px;
+      right: 18px;
+      min-height: 42px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: #fff0b9;
+      box-shadow: 0 4px 0 #cf9731;
+    }
+
+    .fullscreen-toggle[hidden] {
+      display: none;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: #fffef8;
+    }
+
+    input[type="text"] {
+      min-height: 58px;
+      padding: 0 14px;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    textarea {
+      min-height: 76px;
+      padding: 10px;
+      line-height: 1.35;
+      resize: vertical;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .app {
+      width: min(1440px, 100%);
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: auto;
+      padding: 14px;
+    }
+
+    .screen {
+      min-height: calc(100vh - 28px);
+      min-height: calc(100svh - 28px);
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 249, 233, 0.96);
+      box-shadow: 0 18px 0 rgba(22, 35, 56, 0.14);
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .setup {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    .setup-panel {
+      display: grid;
+      align-content: center;
+      gap: 16px;
+      padding: clamp(20px, 4vw, 54px);
+    }
+
+    .setup-panel h1 {
+      margin: 0;
+      font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      font-size: 50px;
+      font-weight: 800;
+      letter-spacing: 0;
+      line-height: 1.08;
+      text-wrap: balance;
+    }
+
+    .setup-panel h1 span {
+      display: block;
+    }
+
+    .setup-panel p,
+    .role-card p,
+    .policy-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .city-start {
+      display: grid;
+      gap: 8px;
+    }
+
+    .setup-scene {
+      position: relative;
+      min-height: 650px;
+      border-left: 4px solid var(--line);
+      background: #b9eeff;
+    }
+
+    #preview-canvas {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .role-card,
+    .stat,
+    .policy-card,
+    .graph-card,
+    .reflection-card {
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 4px 0 rgba(33, 52, 76, 0.16);
+    }
+
+    .role-card {
+      min-height: 116px;
+      padding: 10px;
+    }
+
+    .role-card strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 17px;
+    }
+
+    .turn-screen {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: auto minmax(260px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .year-badge {
+      display: grid;
+      min-width: 144px;
+      min-height: 84px;
+      place-items: center;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      color: #fff8dd;
+      font-size: 40px;
+      font-weight: 1000;
+      background: var(--red);
+      box-shadow: 0 5px 0 #8d3028;
+    }
+
+    .city-title h2,
+    .city-title p {
+      margin: 0;
+    }
+
+    .city-title h2 {
+      font-size: 38px;
+    }
+
+    .turn-path {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .turn-chip {
+      min-width: 58px;
+      padding: 8px;
+      border: 3px solid var(--line);
+      border-radius: 999px;
+      text-align: center;
+      font-weight: 900;
+      background: #fff0b9;
+    }
+
+    .turn-chip.current {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .play-grid {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.96fr) minmax(420px, 1.04fr);
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .world-column,
+    .control-column {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    #city-canvas {
+      width: 100%;
+      aspect-ratio: 16 / 8.8;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .stat {
+      min-height: 88px;
+      padding: 8px;
+    }
+
+    .stat span,
+    .stat output {
+      display: block;
+    }
+
+    .stat span {
+      min-height: 30px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .stat output {
+      font-size: 29px;
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    .stat small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .graph-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .graph-card {
+      padding: 7px;
+    }
+
+    .graph-card strong {
+      display: block;
+      min-height: 32px;
+      font-size: 14px;
+    }
+
+    .graph-card canvas {
+      width: 100%;
+      aspect-ratio: 1.45 / 1;
+      border-width: 2px;
+    }
+
+    .science-note {
+      margin: 0;
+      padding: 9px 11px;
+      border: 3px dashed var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      line-height: 1.35;
+      background: #eaf9ff;
+    }
+
+    .policy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .policy-card {
+      display: grid;
+      gap: 7px;
+      min-height: 182px;
+      padding: 10px;
+    }
+
+    .policy-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .policy-head strong {
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .level {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 1000;
+      background: var(--mint);
+    }
+
+    .policy-card input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .approval-row {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      align-content: start;
+    }
+
+    .approval-row button {
+      min-height: 36px;
+      padding: 4px 7px;
+      border-width: 2px;
+      font-size: 12px;
+      box-shadow: 0 2px 0 #18508d;
+    }
+
+    .approval-row button.approved {
+      color: var(--ink);
+      background: var(--sun);
+      box-shadow: 0 2px 0 #b6771e;
+    }
+
+    .approval-ok {
+      color: #116b58;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .actionbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 3px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff0b9;
+    }
+
+    .actionbar p {
+      margin: 0;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .actionbar p small {
+      display: block;
+      margin-top: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0.65;
+      line-height: 1.4;
+    }
+
+    dialog {
+      width: min(720px, calc(100% - 24px));
+      padding: 0;
+      border: 4px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: 0 20px 70px rgba(17, 29, 47, 0.42);
+    }
+
+    dialog::backdrop {
+      background: rgba(10, 25, 42, 0.55);
+    }
+
+    .event-box {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+    }
+
+    .event-box h2,
+    .event-box p {
+      margin: 0;
+    }
+
+    .event-choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .event-choice {
+      display: grid;
+      align-content: start;
+      gap: 5px;
+      min-height: 154px;
+      padding: 12px;
+      text-align: left;
+    }
+
+    .event-choice small {
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .report-screen {
+      display: grid;
+      grid-template-columns: minmax(390px, 0.9fr) minmax(420px, 1.1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 14px;
+    }
+
+    .report-editor {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .report-editor h2,
+    .report-editor p {
+      margin: 0;
+    }
+
+    .reflection-card {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      font-weight: 900;
+    }
+
+    #report-canvas {
+      width: 100%;
+      background: #fffdf5;
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    html:fullscreen,
+    html:fullscreen body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    html:fullscreen .app {
+      height: 100vh;
+      height: 100svh;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    html:fullscreen .turn-screen.fullscreen-fit {
+      transform: scale(var(--fullscreen-scale, 1));
+      transform-origin: top center;
+      transition: transform 160ms ease;
+    }
+
+    @media (max-width: 1050px) {
+      .setup,
+      .play-grid,
+      .report-screen {
+        grid-template-columns: 1fr;
+      }
+
+      .setup-scene {
+        order: -1;
+        min-height: 340px;
+        border-left: 0;
+        border-bottom: 4px solid var(--line);
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .turn-path {
+        justify-content: flex-start;
+      }
+
+      .setup-panel h1 {
+        font-size: 45px;
+      }
+
+      .city-title h2 {
+        font-size: 31px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 7px;
+      }
+
+      .screen {
+        min-height: calc(100vh - 14px);
+        min-height: calc(100svh - 14px);
+      }
+
+      .role-grid,
+      .policy-grid,
+      .event-choices,
+      .graph-grid,
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .year-badge {
+        min-height: 68px;
+        font-size: 34px;
+      }
+
+      .setup-panel h1 {
+        font-size: 38px;
+      }
+
+      .city-title h2 {
+        font-size: 27px;
+      }
+
+      .stat output {
+        font-size: 25px;
+      }
+
+      .actionbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .fullscreen-toggle {
+        top: 12px;
+        right: 12px;
+        min-height: 38px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="fullscreen-button" class="fullscreen-toggle" type="button" aria-pressed="false">전체화면</button>
+  <main class="app">
+    <section id="setup-screen" class="screen setup" aria-labelledby="setup-title">
+      <div class="setup-panel">
+        <h1 id="setup-title"><span>지구온난화로부터</span><span>우리 도시를 지켜라</span></h1>
+        <p>그래프를 보며 정책을 조정해 2100년 기온 상승을 2.0도 이하로 낮춰 보자.</p>
+        <label class="city-start">
+          <strong>우리 도시 이름</strong>
+          <input id="city-name" type="text" maxlength="18" placeholder="예: 해솔시" autocomplete="off">
+        </label>
+        <button id="start-button" class="good" type="button">2030년 정책 회의 시작</button>
+        <div class="role-grid" aria-label="모둠 역할">
+          <article class="role-card"><strong>환경부 장관</strong><p>온실가스 감축과 숲 정책을 살핀다.</p></article>
+          <article class="role-card"><strong>경제부 장관</strong><p>고정 예산과 다음 턴 대출 승인을 살핀다.</p></article>
+          <article class="role-card"><strong>과학기술부 장관</strong><p>효율 기술과 탄소 제거 투자를 검토한다.</p></article>
+          <article class="role-card"><strong>에너지·산업부 장관</strong><p>에너지 전환과 산업 감축을 조정한다.</p></article>
+        </div>
+      </div>
+      <div class="setup-scene">
+        <canvas id="preview-canvas" width="980" height="760" aria-label="기후 도시 미리보기"></canvas>
+      </div>
+    </section>
+
+    <section id="turn-screen" class="screen turn-screen" hidden aria-label="정책 시뮬레이션">
+      <header class="topbar">
+        <div id="turn-year" class="year-badge">2030</div>
+        <div class="city-title">
+          <h2 id="city-heading"></h2>
+          <p>조절한 정책은 다음 턴에도 이어진다. 그래프 변화와 도시 상태를 함께 보자.</p>
+        </div>
+        <nav id="turn-path" class="turn-path" aria-label="연도 진행"></nav>
+      </header>
+      <div class="play-grid">
+        <section class="world-column" aria-label="도시와 과학 결과">
+          <canvas id="city-canvas" width="980" height="540" aria-label="기후 도시 모습"></canvas>
+          <div class="stat-grid">
+            <article class="stat"><span>2100 기온 변화</span><output id="temperature-stat"></output><small>목표 2.0도 이하</small></article>
+            <article class="stat"><span>2100 온실가스 농도</span><output id="concentration-stat"></output></article>
+            <article class="stat"><span>도시 발전도</span><output id="development-stat"></output><small>70점 미만이면 성장 부족</small></article>
+            <article class="stat"><span>이번 턴 예산</span><output id="cost-stat"></output><small id="cost-detail">예산 안에서 투자</small></article>
+          </div>
+          <div class="graph-grid">
+            <article class="graph-card"><strong>온실가스 배출량</strong><canvas id="emissions-chart" width="320" height="220"></canvas></article>
+            <article class="graph-card"><strong>대기 중 온실가스 농도</strong><canvas id="concentration-chart" width="320" height="220"></canvas></article>
+            <article class="graph-card"><strong>기온 변화</strong><canvas id="temperature-chart" width="320" height="220"></canvas></article>
+          </div>
+          <p class="science-note"><strong>과학 연결:</strong> 배출량이 줄어도 대기 중 농도와 기온은 시간에 따라 천천히 반응한다. 어떤 그래프가 먼저 바뀌는지 보자.</p>
+        </section>
+        <section class="control-column" aria-label="정책 조절">
+          <div id="policy-grid" class="policy-grid"></div>
+          <footer class="actionbar">
+            <p id="turn-message"></p>
+            <div class="report-actions">
+              <button id="loan-button" class="secondary" type="button">경제부 대출 승인</button>
+              <button id="commit-button" class="good" type="button">정책 확정</button>
+            </div>
+          </footer>
+        </section>
+      </div>
+    </section>
+
+    <section id="report-screen" class="screen report-screen" hidden aria-label="2100 결과 보고서">
+      <section class="report-editor">
+        <h2 id="report-title"></h2>
+        <p>짧게 정리한 뒤 보고서 이미지를 저장해 패들릿 발표 자료로 사용한다.</p>
+        <label class="reflection-card">우리 도시의 핵심 전략
+          <textarea id="strategy-input" maxlength="120" placeholder="예: 초반부터 재생에너지와 효율 기술을 함께 키웠다."></textarea>
+        </label>
+        <label class="reflection-card">가장 효과적이었다고 본 과학적 정책과 이유
+          <textarea id="science-input" maxlength="120" placeholder="배출량, 농도, 기온 그래프를 근거로 쓴다."></textarea>
+        </label>
+        <label class="reflection-card">성장과 기후 대응을 함께 보며 고민한 선택
+          <textarea id="tradeoff-input" maxlength="120" placeholder="예산, 대출, 도시 발전도 중 고민한 점을 쓴다."></textarea>
+        </label>
+        <div class="report-actions">
+          <button id="refresh-report" class="secondary" type="button">보고서 반영</button>
+          <button id="download-report" class="good" type="button">PNG 보고서 저장</button>
+          <button id="restart-button" type="button">새 도시 시작</button>
+        </div>
+      </section>
+      <canvas id="report-canvas" width="1400" height="1840" aria-label="저장할 보고서 미리보기"></canvas>
+    </section>
+  </main>
+
+  <dialog id="event-dialog">
+    <section class="event-box">
+      <strong id="event-year"></strong>
+      <h2 id="event-title"></h2>
+      <p id="event-text"></p>
+      <div id="event-choices" class="event-choices"></div>
+    </section>
+  </dialog>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const TURNS = [2030, 2040, 2060, 2080];
+      const FINAL_YEAR = 2100;
+      const YEARS = [...TURNS, FINAL_YEAR];
+      const TARGET = { temperature: 2, development: 70 };
+      const TURN_BUDGET = 40;
+      const BORROW_LIMIT_PER_TURN = 12;
+      const TOTAL_BORROW_LIMIT = 24;
+      const roles = {
+        environment: "환경부",
+        economy: "경제부",
+        science: "과학기술부",
+        energy: "에너지·산업부"
+      };
+      const policies = {
+        fossilReduction: {
+          label: "화석연료 사용 줄이기",
+          hint: "석탄·석유 의존을 줄여 배출량을 직접 낮춘다.",
+          directEmissions: 0.12, budget: 7, burden: 10, development: -2,
+          approvers: ["environment", "economy", "energy"]
+        },
+        renewables: {
+          label: "재생에너지 확대",
+          hint: "태양광·풍력 전환으로 전력 배출을 낮춘다.",
+          directEmissions: 0.09, budget: 9, burden: 4, development: 5,
+          approvers: ["energy", "economy"]
+        },
+        efficiency: {
+          label: "에너지 효율 기술 향상",
+          hint: "같은 활동에 필요한 에너지를 줄인다.",
+          directEmissions: 0.08, budget: 7, burden: 2, development: 6,
+          approvers: ["science", "economy"]
+        },
+        forests: {
+          label: "산림 보호·복원",
+          hint: "탄소 흡수원을 지켜 농도 증가를 늦춘다.",
+          sinkSupport: 0.06, budget: 5, burden: 1, development: 2,
+          approvers: ["environment", "economy"]
+        },
+        demandReduction: {
+          label: "도시 에너지 소비 줄이기",
+          hint: "도시가 쓰는 에너지 자체를 줄여 배출을 낮추지만 성장 속도도 줄 수 있다.",
+          directEmissions: 0.08, budget: 4, burden: 6, development: -4,
+          approvers: ["environment", "economy", "energy"]
+        },
+        carbonRemoval: {
+          label: "탄소 제거 기술 투자",
+          hint: "대기 중 탄소 제거를 돕지만 감축을 대신하지는 않는다.",
+          sinkSupport: 0.05, budget: 10, burden: 2, development: 3,
+          approvers: ["environment", "science", "economy"]
+        }
+      };
+      const baseline = {
+        emissions: { 2030: 57, 2040: 60, 2060: 62, 2080: 61, 2100: 59 },
+        concentration: { 2030: 435, 2040: 470, 2060: 535, 2080: 595, 2100: 650 },
+        temperature: { 2030: 1.5, 2040: 1.8, 2060: 2.5, 2080: 3.1, 2100: 3.6 }
+      };
+      const events = {
+        electricityDemand: {
+          year: 2040,
+          title: "전력 수요가 빠르게 늘고 있다",
+          text: "성장한 도시가 더 많은 전기를 요구한다. 배출 경로와 도시 성장 중 무엇을 우선할지 고르자.",
+          choices: {
+            fossilBackup: {
+              label: "값싼 화석연료 발전 일부 유지",
+              description: "즉시 지출은 덜지만 배출 감축이 늦어진다.",
+              budget: 2, burden: -2, development: 3, emissionsModifier: 0.04
+            },
+            cleanBuildout: {
+              label: "재생에너지와 효율 설비 확대",
+              description: "예산을 더 써서 배출 경로를 낮춘다.",
+              budget: 9, burden: 2, development: 4, renewablesBoost: 1, efficiencyBoost: 1
+            }
+          }
+        },
+        forestExpansion: {
+          year: 2060,
+          title: "도시 확장과 주변 숲 보호",
+          text: "도시가 커지며 숲의 탄소 흡수 기능과 개발 공간이 부딪힌다.",
+          choices: {
+            denseGrowth: {
+              label: "개발 우선으로 발전도 확보",
+              description: "발전도는 오르지만 숲 정책이 약해진다.",
+              budget: 4, burden: 1, development: 7, forestsBoost: -1
+            },
+            forestShield: {
+              label: "숲 보호와 복원 지역 확보",
+              description: "흡수원을 지키며 농도 증가를 늦춘다.",
+              budget: 6, burden: 1, development: 3, forestsBoost: 1
+            }
+          }
+        }
+      };
+
+      const els = {
+        setupScreen: document.querySelector("#setup-screen"),
+        turnScreen: document.querySelector("#turn-screen"),
+        reportScreen: document.querySelector("#report-screen"),
+        cityName: document.querySelector("#city-name"),
+        startButton: document.querySelector("#start-button"),
+        preview: document.querySelector("#preview-canvas"),
+        year: document.querySelector("#turn-year"),
+        cityHeading: document.querySelector("#city-heading"),
+        turnPath: document.querySelector("#turn-path"),
+        cityCanvas: document.querySelector("#city-canvas"),
+        policyGrid: document.querySelector("#policy-grid"),
+        message: document.querySelector("#turn-message"),
+        commitButton: document.querySelector("#commit-button"),
+        loanButton: document.querySelector("#loan-button"),
+        temperatureStat: document.querySelector("#temperature-stat"),
+        concentrationStat: document.querySelector("#concentration-stat"),
+        developmentStat: document.querySelector("#development-stat"),
+        costStat: document.querySelector("#cost-stat"),
+        costDetail: document.querySelector("#cost-detail"),
+        emissionsChart: document.querySelector("#emissions-chart"),
+        concentrationChart: document.querySelector("#concentration-chart"),
+        temperatureChart: document.querySelector("#temperature-chart"),
+        eventDialog: document.querySelector("#event-dialog"),
+        eventYear: document.querySelector("#event-year"),
+        eventTitle: document.querySelector("#event-title"),
+        eventText: document.querySelector("#event-text"),
+        eventChoices: document.querySelector("#event-choices"),
+        reportTitle: document.querySelector("#report-title"),
+        reportCanvas: document.querySelector("#report-canvas"),
+        strategy: document.querySelector("#strategy-input"),
+        science: document.querySelector("#science-input"),
+        tradeoff: document.querySelector("#tradeoff-input"),
+        refreshReport: document.querySelector("#refresh-report"),
+        downloadReport: document.querySelector("#download-report"),
+        restart: document.querySelector("#restart-button"),
+        fullscreen: document.querySelector("#fullscreen-button")
+      };
+
+      let game = null;
+      drawCity(els.preview, { heatRisk: 0.38, cleanEnergy: 0.45, treeCover: 0.5, pollution: 0.42, tech: 0.35 });
+
+      els.startButton.addEventListener("click", startGame);
+      els.cityName.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") startGame();
+      });
+      els.policyGrid.addEventListener("input", updatePolicy);
+      els.policyGrid.addEventListener("click", toggleApproval);
+      els.commitButton.addEventListener("click", commitTurn);
+      els.loanButton.addEventListener("click", approveBudgetLoan);
+      els.refreshReport.addEventListener("click", updateReport);
+      [els.strategy, els.science, els.tradeoff].forEach((input) => input.addEventListener("input", updateReflections));
+      els.downloadReport.addEventListener("click", downloadReport);
+      els.restart.addEventListener("click", () => location.reload());
+      els.fullscreen.addEventListener("click", toggleFullscreen);
+      document.addEventListener("fullscreenchange", syncFullscreenButton);
+      window.addEventListener("resize", scheduleFullscreenFit);
+      if (!document.documentElement.requestFullscreen) {
+        els.fullscreen.hidden = true;
+      }
+
+      function startGame() {
+        const cityName = els.cityName.value.trim() || "우리 기후 도시";
+        game = {
+          cityName,
+          turnIndex: 0,
+          history: [],
+          draft: zeroPolicies(),
+          approvals: {},
+          budgetApproval: false,
+          budgetLoans: [],
+          eventChoices: {},
+          eventEffects: [],
+          reflections: { strategy: "", science: "", tradeoff: "" }
+        };
+        els.setupScreen.hidden = true;
+        els.turnScreen.hidden = false;
+        renderTurn();
+        scheduleFullscreenFit();
+      }
+
+      async function toggleFullscreen() {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          } else {
+            await document.documentElement.requestFullscreen();
+          }
+        } catch (error) {
+          els.fullscreen.textContent = "전체화면 불가";
+          els.fullscreen.disabled = true;
+        }
+      }
+
+      function syncFullscreenButton() {
+        const active = Boolean(document.fullscreenElement);
+        els.fullscreen.textContent = active ? "전체화면 종료" : "전체화면";
+        els.fullscreen.setAttribute("aria-pressed", String(active));
+        scheduleFullscreenFit();
+      }
+
+      function scheduleFullscreenFit() {
+        requestAnimationFrame(fitTurnScreenToFullscreen);
+      }
+
+      function fitTurnScreenToFullscreen() {
+        els.turnScreen.classList.remove("fullscreen-fit");
+        els.turnScreen.style.removeProperty("--fullscreen-scale");
+        if (!document.fullscreenElement || els.turnScreen.hidden) return;
+
+        const usableHeight = window.innerHeight - 28;
+        const usableWidth = window.innerWidth - 28;
+        const heightScale = usableHeight / els.turnScreen.scrollHeight;
+        const widthScale = usableWidth / els.turnScreen.scrollWidth;
+        const scale = Math.min(1, heightScale, widthScale);
+        els.turnScreen.style.setProperty("--fullscreen-scale", scale.toFixed(3));
+        els.turnScreen.classList.add("fullscreen-fit");
+      }
+
+      function zeroPolicies() {
+        return Object.fromEntries(Object.keys(policies).map((key) => [key, 0]));
+      }
+
+      // 장관별 이번 턴 승인 횟수
+      function ministerApprovalCount(role) {
+        return Object.values(game.approvals).filter((approvers) => approvers.includes(role)).length;
+      }
+
+      function renderTurn() {
+        const year = TURNS[game.turnIndex];
+        els.year.textContent = year;
+        els.cityHeading.textContent = `${game.cityName} 정책 회의`;
+        els.turnPath.innerHTML = YEARS.map((item) => `<span class="turn-chip${item === year ? " current" : ""}">${item}</span>`).join("");
+        els.policyGrid.innerHTML = Object.entries(policies).map(([key, policy]) => policyCard(key, policy)).join("");
+        const counts = Object.keys(roles).map((r) => {
+          const used = ministerApprovalCount(r);
+          return `${roles[r]} <b style="color:${used >= 2 ? 'var(--red)' : 'var(--ink)'}">${used}/2</b>`;
+        }).join(' &thinsp;·&thinsp; ');
+        els.message.innerHTML = `레벨 3 이상 정책은 부처 승인 필요 &nbsp;·&nbsp; 예산 초과는 경제부 대출<br><small>장관별 승인 횟수: ${counts}</small>`;
+        renderScenario();
+      }
+
+      function policyCard(key, policy) {
+        const level = game.draft[key];
+        const approvals = game.approvals[key] ?? [];
+        const devDelta = policy.development * level;
+        const devColor = devDelta > 0 ? "var(--mint)" : devDelta < 0 ? "var(--red)" : "var(--muted)";
+        const devText = devDelta > 0 ? `+${devDelta}` : `${devDelta}`;
+        const approvalMarkup = level < 3
+          ? `<span class="approval-ok">완만한 조정은 바로 적용</span>`
+          : policy.approvers.map((role) => {
+              const isApproved = approvals.includes(role);
+              const isMaxed = !isApproved && ministerApprovalCount(role) >= 2;
+              return `<button type="button" data-policy="${key}" data-role="${role}"
+                class="${isApproved ? "approved" : ""}" ${isMaxed ? "disabled" : ""}>
+                ${roles[role]} ${isApproved ? "승인됨" : isMaxed ? "한도초과" : "승인"}
+              </button>`;
+            }).join("");
+
+        return `
+          <article class="policy-card">
+            <div class="policy-head"><strong>${policy.label}</strong><output class="level">${level}</output></div>
+            <p>${policy.hint}</p>
+            <p style="margin:0;font-size:12px;color:var(--muted);">발전도 영향 <strong style="color:${devColor}">${devDelta !== 0 ? devText : "없음"}</strong> <span style="opacity:.7">(레벨당 ${policy.development > 0 ? "+" : ""}${policy.development})</span></p>
+            <input aria-label="${policy.label}" data-slider="${key}" type="range" min="0" max="4" step="1" value="${level}">
+            <div class="approval-row">${approvalMarkup}</div>
+          </article>
+        `;
+      }
+
+      function updatePolicy(event) {
+        const key = event.target.dataset.slider;
+        if (!key) return;
+        game.draft[key] = clamp(Number(event.target.value), 0, 4);
+        game.approvals[key] = [];
+        game.budgetApproval = false;
+        renderTurn();
+      }
+
+      function toggleApproval(event) {
+        const role = event.target.dataset.role;
+        const key = event.target.dataset.policy;
+        if (!role || !key) return;
+        const current = new Set(game.approvals[key] ?? []);
+        if (current.has(role)) {
+          current.delete(role);
+        } else {
+          if (ministerApprovalCount(role) >= 2) {
+            els.message.textContent = `${roles[role]} 장관은 이번 턴 승인을 2회 모두 사용했다. 다른 승인을 취소하거나 정책을 조정해야 한다.`;
+            return;
+          }
+          current.add(role);
+        }
+        game.approvals[key] = [...current];
+        renderTurn();
+      }
+
+      function commitTurn() {
+        const missing = missingApprovals();
+        if (missing.length) {
+          els.message.textContent = `${missing.join(", ")} 강한 정책 승인이 아직 부족하다.`;
+          return;
+        }
+        const budget = turnBudgetStatus();
+        if (!budget.canCommit) {
+          els.message.textContent = budget.reason === "borrow-limit"
+            ? `대출 한도 초과다. 이번 턴 지출을 ${budget.baseBudget + budget.borrowable} 이하로 낮춰야 한다.`
+            : `이번 턴 예산이 ${budget.shortfall} 부족하다. 경제부 장관이 다음 턴 예산 당겨쓰기를 승인해야 한다.`;
+          return;
+        }
+
+        const year = TURNS[game.turnIndex];
+        game.history.push({ year, policies: { ...game.draft } });
+        if (budget.loanNeeded > 0) {
+          game.budgetLoans.push({ fromYear: year, dueYear: TURNS[game.turnIndex + 1], amount: budget.loanNeeded });
+        }
+        game.turnIndex += 1;
+        game.approvals = {};
+        game.budgetApproval = false;
+
+        if (game.turnIndex >= TURNS.length) {
+          openReport();
+          return;
+        }
+
+        const eventKey = eventForYear(TURNS[game.turnIndex]);
+        if (eventKey) {
+          showEvent(eventKey);
+          return;
+        }
+        renderTurn();
+      }
+
+      function missingApprovals() {
+        return Object.entries(policies).filter(([key]) => game.draft[key] >= 3).filter(([key, policy]) => {
+          const approved = game.approvals[key] ?? [];
+          return !policy.approvers.every((role) => approved.includes(role));
+        }).map(([, policy]) => policy.label);
+      }
+
+      function eventForYear(year) {
+        return Object.keys(events).find((key) => events[key].year === year && !game.eventChoices[key]);
+      }
+
+      function showEvent(eventKey) {
+        const event = events[eventKey];
+        els.eventYear.textContent = `${event.year} 정책 선택 이벤트`;
+        els.eventTitle.textContent = event.title;
+        els.eventText.textContent = event.text;
+        els.eventChoices.innerHTML = Object.entries(event.choices).map(([key, choice]) => `
+          <button type="button" class="event-choice" data-choice="${key}">
+            <strong>${choice.label}</strong>
+            <small>${choice.description}</small>
+          </button>
+        `).join("");
+        els.eventChoices.onclick = (click) => {
+          const choiceKey = click.target.closest("[data-choice]")?.dataset.choice;
+          if (!choiceKey) return;
+          applyEvent(eventKey, choiceKey);
+        };
+        els.eventDialog.showModal();
+      }
+
+      function applyEvent(eventKey, choiceKey) {
+        const event = events[eventKey];
+        const choice = event.choices[choiceKey];
+        game.eventChoices[eventKey] = choiceKey;
+        game.eventEffects.push({ eventKey, choiceKey, year: event.year, ...choice });
+        game.budgetApproval = false;
+        els.eventDialog.close();
+        renderTurn();
+      }
+
+      function approveBudgetLoan() {
+        const budget = turnBudgetStatus();
+        if (budget.shortfall === 0) {
+          els.message.textContent = "이번 턴 지출은 고정 예산 안이다. 대출 승인이 필요하지 않다.";
+          return;
+        }
+        if (budget.shortfall > budget.borrowable) {
+          els.message.textContent = `대출 한도는 이번 턴 ${budget.borrowable}까지다. 정책 지출을 줄여야 한다.`;
+          return;
+        }
+        game.budgetApproval = true;
+        els.message.textContent = `경제부가 ${budget.shortfall} 예산 당겨쓰기를 승인했다. 다음 턴 예산에서 차감된다.`;
+        renderScenario();
+      }
+
+      function renderScenario() {
+        const simulation = simulate(previewTurns());
+        const final = addEventScores(simulation.final);
+        els.temperatureStat.textContent = `${final.temperature.toFixed(2)}도`;
+        els.concentrationStat.textContent = `${final.concentration.toFixed(1)} ppm`;
+        els.developmentStat.textContent = `${Math.round(final.development)}점`;
+        const budget = turnBudgetStatus();
+        els.costStat.textContent = `${budget.spend} / ${budget.baseBudget}`;
+        const borrowed = totalBorrowed();
+        const borrowedSuffix = borrowed > 0 ? ` · 누적 대출 ${borrowed}/${TOTAL_BORROW_LIMIT}` : '';
+        els.costDetail.textContent = (budget.shortfall === 0
+          ? `남은 예산 ${budget.baseBudget - budget.spend}`
+          : budget.shortfall <= budget.borrowable
+            ? `대출 필요 ${budget.shortfall}${budget.economyApproved ? " 승인됨" : ""}`
+            : `대출 한도 초과 ${budget.shortfall - budget.borrowable}`) + borrowedSuffix;
+        els.costStat.style.color = budget.shortfall > budget.borrowable ? "#c23f35" : budget.shortfall ? "#a05b00" : "#11745d";
+        els.loanButton.disabled = budget.shortfall === 0 || budget.shortfall > budget.borrowable || budget.economyApproved;
+        els.loanButton.textContent = budget.economyApproved ? "경제부 대출 승인됨" : "경제부 대출 승인";
+        els.temperatureStat.style.color = final.temperature <= TARGET.temperature ? "#11745d" : "#c23f35";
+        drawChart(els.emissionsChart, simulation.series, "emissions", "#297ad6", "Gt", [0, 65]);
+        drawChart(els.concentrationChart, simulation.series, "concentration", "#8c4ab8", "ppm", [410, 660]);
+        drawChart(els.temperatureChart, simulation.series, "temperature", "#d24a3c", "도", [1, 3.8]);
+        drawCity(els.cityCanvas, cityMood(final, game.draft), game.cityName);
+      }
+
+      function previewTurns() {
+        const year = TURNS[game.turnIndex];
+        return [...game.history, { year, policies: { ...game.draft } }];
+      }
+
+      function applyEventBoosts(active, year) {
+        return game.eventEffects.reduce((acc, effect) => {
+          if (effect.year > year) return acc;
+          return {
+            ...acc,
+            renewables: clamp(acc.renewables + (effect.renewablesBoost ?? 0), 0, 4),
+            efficiency: clamp(acc.efficiency + (effect.efficiencyBoost ?? 0), 0, 4),
+            forests: clamp(acc.forests + (effect.forestsBoost ?? 0), 0, 4)
+          };
+        }, { ...active });
+      }
+
+      function simulate(turns) {
+        const policyMap = carriedPolicies(turns);
+        let previousYear = TURNS[0];
+        let previousConcentration = baseline.concentration[previousYear];
+        let previousTemperature = baseline.temperature[previousYear];
+        const series = YEARS.map((year, index) => {
+          const active = applyEventBoosts(policyMap[year], year);
+          const emissions = emissionsFor(year, active) + eventEmissionPenalty(year);
+          const concentration = index === 0
+            ? firstConcentration(year, emissions, active)
+            : concentrationFor(year, previousYear, emissions, active, previousConcentration);
+          const temperature = temperatureFor(year, concentration, active, previousTemperature);
+          const society = societyFor(active);
+          previousYear = year;
+          previousConcentration = concentration;
+          previousTemperature = temperature;
+          return { year, emissions, concentration, temperature, ...society };
+        });
+        return { series, final: series.at(-1) };
+      }
+
+      function carriedPolicies(turns) {
+        const byTurn = new Map(turns.map((turn) => [turn.year, turn.policies]));
+        const active = zeroPolicies();
+        return YEARS.reduce((map, year) => {
+          Object.assign(active, byTurn.get(year) ?? {});
+          map[year] = { ...active };
+          return map;
+        }, {});
+      }
+
+      function emissionsFor(year, active) {
+        const directCut = Object.entries(active).reduce((sum, [key, level]) => {
+          return sum + (policies[key].directEmissions ?? 0) * level;
+        }, 0);
+        return round1(baseline.emissions[year] * Math.max(0.18, 1 - directCut));
+      }
+
+      function eventEmissionPenalty(year) {
+        return game.eventEffects.reduce((sum, effect) => {
+          if (!effect.emissionsModifier || year < effect.year) return sum;
+          return sum + baseline.emissions[year] * effect.emissionsModifier;
+        }, 0);
+      }
+
+      function firstConcentration(year, emissions, active) {
+        const avoided = (1 - emissions / baseline.emissions[year]) * 12 + sinkSupport(active) * 10;
+        return round1(baseline.concentration[year] - avoided);
+      }
+
+      function concentrationFor(year, previousYear, emissions, active, previous) {
+        const baselineStep = baseline.concentration[year] - baseline.concentration[previousYear];
+        const step = baselineStep * (emissions / baseline.emissions[year]) * Math.max(0.42, 1 - sinkSupport(active));
+        return round1(Math.max(410, previous + step));
+      }
+
+      function temperatureFor(year, concentration, active, previous) {
+        const concentrationGap = concentration - baseline.concentration[year];
+        const target = baseline.temperature[year] + concentrationGap * 0.008;
+        return round2(previous + (target - previous) * 0.7);
+      }
+
+      function sinkSupport(active) {
+        return active.forests * policies.forests.sinkSupport + active.carbonRemoval * policies.carbonRemoval.sinkSupport;
+      }
+
+      function societyFor(active) {
+        return Object.entries(active).reduce((totals, [key, level]) => {
+          totals.budget += policies[key].budget * level;
+          totals.burden += policies[key].burden * level;
+          totals.development += policies[key].development * level;
+          return totals;
+        }, { budget: 0, burden: 0, development: 50 });
+      }
+
+      function addEventScores(final) {
+        const totals = game.eventEffects.reduce((scores, effect) => {
+          scores.budget += effect.budget ?? 0;
+          scores.burden += effect.burden ?? 0;
+          scores.development += effect.development ?? 0;
+          return scores;
+        }, { budget: 0, burden: 0, development: 0 });
+        return {
+          ...final,
+          budget: final.budget + totals.budget,
+          burden: final.burden + totals.burden,
+          development: final.development + totals.development
+        };
+      }
+
+      function turnBudgetStatus() {
+        const year = TURNS[game.turnIndex];
+        const nextYear = TURNS[game.turnIndex + 1];
+        const debtDue = game.budgetLoans
+          .filter((loan) => loan.dueYear === year)
+          .reduce((sum, loan) => sum + loan.amount, 0);
+        const baseBudget = TURN_BUDGET - debtDue;
+        const spend = policyIncreaseSpend() + eventSpendForYear(year);
+        const shortfall = Math.max(0, spend - baseBudget);
+        const borrowable = nextYear
+          ? Math.max(0, Math.min(BORROW_LIMIT_PER_TURN, TOTAL_BORROW_LIMIT - totalBorrowed()))
+          : 0;
+        const fitsLoan = shortfall <= borrowable;
+        return {
+          year,
+          debtDue,
+          baseBudget,
+          spend,
+          shortfall,
+          borrowable,
+          economyApproved: game.budgetApproval,
+          loanNeeded: shortfall > 0 && fitsLoan ? shortfall : 0,
+          canCommit: shortfall === 0 || fitsLoan && game.budgetApproval,
+          reason: shortfall > borrowable ? "borrow-limit" : shortfall > 0 && !game.budgetApproval ? "approval-needed" : "ok"
+        };
+      }
+
+      function policyIncreaseSpend() {
+        const previous = game.history.at(-1)?.policies ?? zeroPolicies();
+        return Object.entries(game.draft).reduce((sum, [key, level]) => {
+          return sum + Math.max(0, level - previous[key]) * policies[key].budget;
+        }, 0);
+      }
+
+      function eventSpendForYear(year) {
+        return game.eventEffects
+          .filter((effect) => effect.year === year)
+          .reduce((sum, effect) => sum + (effect.budget ?? 0), 0);
+      }
+
+      function totalBorrowed() {
+        return game.budgetLoans.reduce((sum, loan) => sum + loan.amount, 0);
+      }
+
+      function cityMood(final, active) {
+        return {
+          heatRisk: clamp((final.temperature - 1.45) / 2.1, 0, 1),
+          cleanEnergy: clamp((active.renewables + active.efficiency) / 8, 0, 1),
+          treeCover: clamp(active.forests / 4, 0, 1),
+          pollution: clamp(1 - active.fossilReduction / 4, 0, 1),
+          tech: clamp((active.efficiency + active.carbonRemoval) / 8, 0, 1),
+          energySaving: clamp(active.demandReduction / 4, 0, 1)
+        };
+      }
+
+      function drawChart(canvas, series, key, color, unit, range) {
+        const ctx = canvas.getContext("2d");
+        const width = canvas.width;
+        const height = canvas.height;
+        const pad = { top: 24, right: 16, bottom: 35, left: 42 };
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#fffdf5";
+        ctx.fillRect(0, 0, width, height);
+        ctx.strokeStyle = "#b9c7d4";
+        ctx.lineWidth = 1;
+        for (let row = 0; row < 4; row += 1) {
+          const y = pad.top + row * ((height - pad.top - pad.bottom) / 3);
+          ctx.beginPath();
+          ctx.moveTo(pad.left, y);
+          ctx.lineTo(width - pad.right, y);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = "#21344c";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, pad.top);
+        ctx.lineTo(pad.left, height - pad.bottom);
+        ctx.lineTo(width - pad.right, height - pad.bottom);
+        ctx.stroke();
+        ctx.fillStyle = "#21344c";
+        ctx.font = "700 12px sans-serif";
+        ctx.fillText(unit, 8, 16);
+        ctx.fillText(String(range[1]), 5, pad.top + 4);
+        ctx.fillText(String(range[0]), 5, height - pad.bottom + 4);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        series.forEach((point, index) => {
+          const x = pad.left + index * ((width - pad.left - pad.right) / (series.length - 1));
+          const y = height - pad.bottom - ((point[key] - range[0]) / (range[1] - range[0])) * (height - pad.top - pad.bottom);
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        series.forEach((point, index) => {
+          const x = pad.left + index * ((width - pad.left - pad.right) / (series.length - 1));
+          const y = height - pad.bottom - ((point[key] - range[0]) / (range[1] - range[0])) * (height - pad.top - pad.bottom);
+          ctx.beginPath();
+          ctx.fillStyle = color;
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#21344c";
+          ctx.fillText(String(point.year).slice(2), x - 10, height - 13);
+        });
+      }
+
+      function drawCity(canvas, mood, cityName) {
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, blend("#7fd8ff", "#ff9a72", mood.heatRisk * 0.75));
+        sky.addColorStop(0.7, blend("#dff7ff", "#ffd38d", mood.heatRisk * 0.7));
+        sky.addColorStop(1, "#eff8db");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = `rgba(255, 196, 73, ${0.9 - mood.heatRisk * 0.18})`;
+        ctx.beginPath();
+        ctx.arc(w * 0.84, h * 0.17, Math.max(36, w * 0.055), 0, Math.PI * 2);
+        ctx.fill();
+        drawSkyDetails(ctx, w, h, mood.heatRisk);
+        drawHills(ctx, w, h, mood.treeCover, mood.heatRisk);
+        drawBackgroundDistrict(ctx, w, h, mood);
+        ctx.fillStyle = blend("#4fa969", "#bf9961", mood.heatRisk * 0.65);
+        ctx.fillRect(0, h * 0.67, w, h * 0.33);
+        drawParkDetails(ctx, w, h, mood);
+        drawRoad(ctx, w, h);
+        drawBuildings(ctx, w, h, mood);
+        drawTrees(ctx, w, h, mood.treeCover);
+        drawEnergy(ctx, w, h, mood);
+        drawStreetLife(ctx, w, h, mood);
+        drawHeat(ctx, w, h, mood.heatRisk, mood.pollution);
+        if (cityName) {
+          ctx.fillStyle = "rgba(255, 253, 245, 0.9)";
+          roundRect(ctx, 18, 18, Math.min(w - 36, 350), 62, 8);
+          ctx.fill();
+          ctx.strokeStyle = "#21344c";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.fillStyle = "#162338";
+          ctx.font = `900 ${Math.max(22, w / 34)}px sans-serif`;
+          ctx.fillText(cityName, 36, 58);
+        }
+      }
+
+      function drawSkyDetails(ctx, w, h, heatRisk) {
+        // 구름
+        const clouds = [
+          [0.11, 0.17, 1.08],
+          [0.43, 0.12, 0.82],
+          [0.68, 0.28, 0.68]
+        ];
+        clouds.forEach(([xFactor, yFactor, scale]) => {
+          const x = w * xFactor;
+          const y = h * yFactor;
+          // 구름 그림자
+          ctx.fillStyle = `rgba(180, 210, 230, ${0.25 - heatRisk * 0.15})`;
+          [[0, 6, 34], [31, -8, 42], [72, 6, 31], [37, 16, 48], [55, 2, 28]].forEach(([dx, dy, r]) => {
+            ctx.beginPath();
+            ctx.arc(x + dx * scale + 4, y + dy * scale + 6, r * scale, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          // 구름 본체
+          ctx.fillStyle = `rgba(255, 255, 252, ${0.82 - heatRisk * 0.44})`;
+          [[0, 0, 34], [31, -14, 42], [72, 0, 31], [37, 10, 48], [55, -8, 28]].forEach(([dx, dy, r]) => {
+            ctx.beginPath();
+            ctx.arc(x + dx * scale, y + dy * scale, r * scale, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        });
+        // 햇살
+        ctx.strokeStyle = `rgba(255, 225, 137, ${0.16 + heatRisk * 0.32})`;
+        ctx.lineWidth = 5;
+        for (let ray = 0; ray < 7; ray += 1) {
+          const angle = -0.9 + ray * 0.28;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.84 + Math.cos(angle) * w * 0.075, h * 0.17 + Math.sin(angle) * w * 0.075);
+          ctx.lineTo(w * 0.84 + Math.cos(angle) * w * 0.16, h * 0.17 + Math.sin(angle) * w * 0.16);
+          ctx.stroke();
+        }
+        // 새 (청명할수록 많음)
+        const birdCount = Math.round((1 - heatRisk * 0.8) * 7);
+        ctx.strokeStyle = `rgba(35, 50, 75, ${0.55 - heatRisk * 0.3})`;
+        ctx.lineWidth = 2;
+        for (let b = 0; b < birdCount; b++) {
+          const bx = w * (0.12 + b * 0.09 + (b % 2) * 0.05);
+          const by = h * (0.06 + (b % 4) * 0.04);
+          const bs = 5 + (b % 3) * 3;
+          ctx.beginPath();
+          ctx.moveTo(bx - bs, by);
+          ctx.quadraticCurveTo(bx - bs * 0.4, by - bs * 0.55, bx, by);
+          ctx.quadraticCurveTo(bx + bs * 0.4, by - bs * 0.55, bx + bs, by);
+          ctx.stroke();
+        }
+      }
+
+      function drawHills(ctx, w, h, treeCover, heatRisk) {
+        // 뒷산 (연하고 먼 느낌)
+        ctx.fillStyle = blend("#82c496", "#b4a878", heatRisk * 0.5);
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.56);
+        ctx.quadraticCurveTo(w * 0.22, h * (0.39 - treeCover * 0.04), w * 0.48, h * 0.57);
+        ctx.quadraticCurveTo(w * 0.7, h * 0.37, w, h * 0.58);
+        ctx.lineTo(w, h * 0.73);
+        ctx.lineTo(0, h * 0.73);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        // 앞산
+        ctx.fillStyle = blend("#5fa775", "#9e9361", heatRisk * 0.55);
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.52);
+        ctx.quadraticCurveTo(w * 0.18, h * (0.35 - treeCover * 0.05), w * 0.38, h * 0.54);
+        ctx.quadraticCurveTo(w * 0.62, h * 0.32, w, h * 0.55);
+        ctx.lineTo(w, h * 0.73);
+        ctx.lineTo(0, h * 0.73);
+        ctx.closePath();
+        ctx.fill();
+        // 산 능선 하이라이트
+        ctx.strokeStyle = `rgba(255,255,255,${0.12 - heatRisk * 0.08})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.52);
+        ctx.quadraticCurveTo(w * 0.18, h * (0.35 - treeCover * 0.05), w * 0.38, h * 0.54);
+        ctx.quadraticCurveTo(w * 0.62, h * 0.32, w, h * 0.55);
+        ctx.stroke();
+      }
+
+      function drawBackgroundDistrict(ctx, w, h, mood) {
+        const skyline = [
+          [0.02, 0.09, 0.12],
+          [0.13, 0.06, 0.17],
+          [0.23, 0.08, 0.1],
+          [0.54, 0.07, 0.13],
+          [0.64, 0.05, 0.18],
+          [0.77, 0.08, 0.11],
+          [0.89, 0.06, 0.15]
+        ];
+        ctx.fillStyle = blend("#7798b4", "#9a8067", mood.heatRisk * 0.6);
+        skyline.forEach(([x, width, height], index) => {
+          const top = h * (0.58 - height);
+          ctx.fillRect(w * x, top, w * width, h * height);
+          ctx.fillStyle = "rgba(255, 239, 171, 0.44)";
+          for (let pane = 0; pane < 3; pane += 1) {
+            ctx.fillRect(w * x + 11 + pane * 18, top + 18 + (index % 2) * 8, 9, 12);
+          }
+          ctx.fillStyle = blend("#7798b4", "#9a8067", mood.heatRisk * 0.6);
+        });
+        ctx.fillStyle = `rgba(245, 250, 246, ${0.24 + mood.cleanEnergy * 0.24})`;
+        ctx.fillRect(0, h * 0.585, w, h * 0.018);
+      }
+
+      function drawParkDetails(ctx, w, h, mood) {
+        // 공원 잔디
+        ctx.fillStyle = blend("#68c785", "#bca367", mood.heatRisk * 0.58);
+        roundRect(ctx, w * 0.018, h * 0.705, w * 0.2, h * 0.2, 22);
+        ctx.fill();
+        // 연못 (깊이감)
+        ctx.fillStyle = `rgba(140, 195, 230, ${0.5 + mood.treeCover * 0.2})`;
+        ctx.beginPath();
+        ctx.ellipse(w * 0.13, h * 0.83, w * 0.058, h * 0.028, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = `rgba(203, 243, 255, ${0.5 + mood.treeCover * 0.3})`;
+        ctx.beginPath();
+        ctx.ellipse(w * 0.125, h * 0.822, w * 0.032, h * 0.013, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        // 산책로
+        ctx.strokeStyle = "#d6c08c";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.02, h * 0.76);
+        ctx.bezierCurveTo(w * 0.07, h * 0.74, w * 0.11, h * 0.88, w * 0.21, h * 0.88);
+        ctx.stroke();
+        // 꽃 (열기 낮을수록)
+        if (mood.heatRisk < 0.6) {
+          const flowerColors = ["#ff7eb3", "#ffca3a", "#ff6b6b", "#c77dff"];
+          [[0.03, 0.75], [0.07, 0.79], [0.17, 0.77], [0.19, 0.82]].forEach(([fx, fy], i) => {
+            ctx.fillStyle = flowerColors[i % flowerColors.length];
+            ctx.beginPath();
+            ctx.arc(w * fx, h * fy, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#fff176";
+            ctx.beginPath();
+            ctx.arc(w * fx, h * fy, 2, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+        // 가뭄 균열
+        if (mood.heatRisk > 0.58) {
+          ctx.strokeStyle = `rgba(101, 74, 49, ${mood.heatRisk * 0.72})`;
+          ctx.lineWidth = 3;
+          [[0.86, 0.83], [0.91, 0.9], [0.28, 0.92]].forEach(([x, y]) => {
+            ctx.beginPath();
+            ctx.moveTo(w * x, h * y);
+            ctx.lineTo(w * (x + 0.024), h * (y - 0.018));
+            ctx.lineTo(w * (x + 0.046), h * (y + 0.01));
+            ctx.stroke();
+          });
+        }
+      }
+
+      function drawRoad(ctx, w, h) {
+        ctx.fillStyle = "#445164";
+        ctx.beginPath();
+        ctx.moveTo(w * 0.27, h);
+        ctx.lineTo(w * 0.44, h * 0.67);
+        ctx.lineTo(w * 0.58, h * 0.67);
+        ctx.lineTo(w * 0.78, h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#ffe99e";
+        ctx.lineWidth = Math.max(4, w / 150);
+        ctx.setLineDash([22, 18]);
+        ctx.beginPath();
+        ctx.moveTo(w * 0.525, h * 0.72);
+        ctx.lineTo(w * 0.54, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#f5f1d4";
+        for (let stripe = 0; stripe < 6; stripe += 1) {
+          const stripeY = h * (0.77 + stripe * 0.012);
+          ctx.fillRect(w * (0.365 - stripe * 0.01), stripeY, w * (0.095 + stripe * 0.02), h * 0.006);
+        }
+        ctx.strokeStyle = "#9bd7d8";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.205, h * 0.94);
+        ctx.lineTo(w * 0.39, h * 0.69);
+        ctx.stroke();
+      }
+
+      function drawBuildings(ctx, w, h, mood) {
+        const buildingXs = [0.08, 0.18, 0.31, 0.59, 0.71, 0.83];
+        const baseColors = ["#6a5fa8", "#4e79ba", "#5a6fa8", "#4a6db8", "#6055a0", "#4872b4"];
+        buildingXs.forEach((factor, index) => {
+          const bw = w * (index % 2 ? 0.095 : 0.11);
+          const bh = h * (0.22 + (index % 3) * 0.08 + mood.tech * 0.06);
+          const x = w * factor;
+          const y = h * 0.68 - bh;
+          // 그림자
+          ctx.fillStyle = "rgba(22, 35, 56, 0.18)";
+          ctx.fillRect(x + bw, y + bh * 0.08, bw * 0.28, bh * 0.92);
+          // 건물 본체
+          ctx.fillStyle = baseColors[index];
+          ctx.fillRect(x, y, bw, bh);
+          // 측면 (밝기 차이로 입체감)
+          ctx.fillStyle = "rgba(255,255,255,0.09)";
+          ctx.fillRect(x, y, bw * 0.12, bh);
+          ctx.fillStyle = "rgba(0,0,0,0.12)";
+          ctx.fillRect(x + bw * 0.88, y, bw * 0.12, bh);
+          // 외곽선
+          ctx.strokeStyle = "#21344c";
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(x, y, bw, bh);
+          // 창문 그리드 (에너지 절약 높을수록 소등 비율 증가)
+          const cols = 3;
+          const rowCount = Math.min(Math.floor(bh / 26), 8);
+          const litThreshold = Math.round((0.8 - mood.energySaving * 0.42) * 20);
+          for (let row = 0; row < rowCount; row++) {
+            for (let col = 0; col < cols; col++) {
+              const wx = x + bw * (0.1 + col * 0.29);
+              const wy = y + 14 + row * 24;
+              const hash = (index * 17 + row * 7 + col * 3) % 20;
+              const lit = hash < litThreshold;
+              ctx.fillStyle = lit ? "#c8eeff" : "#1a3050";
+              ctx.fillRect(wx, wy, bw * 0.17, 11);
+              if (lit) {
+                ctx.fillStyle = "rgba(255,250,220,0.4)";
+                ctx.fillRect(wx, wy, bw * 0.07, 4);
+              }
+            }
+          }
+          // 옥상 태양광 패널
+          if (mood.cleanEnergy > 0.3 && index % 2 === 0) {
+            ctx.fillStyle = "#1a3f70";
+            ctx.fillRect(x + bw * 0.08, y - 9, bw * 0.78, 9);
+            ctx.strokeStyle = "rgba(100,170,255,0.55)";
+            ctx.lineWidth = 1;
+            for (let p = 1; p < 4; p++) {
+              ctx.beginPath();
+              ctx.moveTo(x + bw * (0.08 + p * 0.18), y - 9);
+              ctx.lineTo(x + bw * (0.08 + p * 0.18), y);
+              ctx.stroke();
+            }
+            ctx.beginPath();
+            ctx.moveTo(x + bw * 0.08, y - 4);
+            ctx.lineTo(x + bw * 0.86, y - 4);
+            ctx.stroke();
+          }
+          // 출입구
+          if (index === 1 || index === 4) {
+            ctx.fillStyle = "#f2d16e";
+            ctx.fillRect(x + bw * 0.14, y + bh - 32, bw * 0.26, 32);
+            ctx.strokeStyle = "#21344c";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x + bw * 0.14, y + bh - 32, bw * 0.26, 32);
+            // 문손잡이
+            ctx.fillStyle = "#8a6a00";
+            ctx.fillRect(x + bw * 0.33, y + bh - 18, 2, 8);
+          }
+        });
+      }
+
+      function drawTrees(ctx, w, h, treeCover) {
+        const count = 3 + Math.round(treeCover * 11);
+        for (let index = 0; index < count; index += 1) {
+          const side = index % 2 === 0 ? 0.04 + (index % 5) * 0.05 : 0.76 + (index % 4) * 0.05;
+          const x = w * side;
+          const y = h * (0.69 + (index % 3) * 0.045);
+          const scale = 0.75 + (index % 4) * 0.13;
+          const isPine = index % 4 === 2;
+          // 나무 그림자
+          ctx.fillStyle = "rgba(22, 35, 56, 0.12)";
+          ctx.beginPath();
+          ctx.ellipse(x + 6, y + 36 * scale, 20 * scale, 5 * scale, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // 기둥
+          ctx.fillStyle = "#6b3f20";
+          ctx.fillRect(x - 5 * scale, y, 10 * scale, 38 * scale);
+          if (isPine) {
+            // 침엽수 (삼각형 3단)
+            const green = index % 2 ? "#1a6b3a" : "#236b42";
+            ctx.fillStyle = green;
+            [0, 1, 2].forEach((layer) => {
+              const lw = (30 - layer * 5) * scale;
+              const ly = y - 8 * scale - layer * 20 * scale;
+              ctx.beginPath();
+              ctx.moveTo(x, ly - 22 * scale);
+              ctx.lineTo(x + lw, ly);
+              ctx.lineTo(x - lw, ly);
+              ctx.closePath();
+              ctx.fill();
+              // 하이라이트
+              ctx.fillStyle = "rgba(255,255,255,0.08)";
+              ctx.beginPath();
+              ctx.moveTo(x, ly - 22 * scale);
+              ctx.lineTo(x + lw * 0.25, ly - 12 * scale);
+              ctx.lineTo(x, ly - 8 * scale);
+              ctx.closePath();
+              ctx.fill();
+              ctx.fillStyle = green;
+            });
+          } else {
+            // 활엽수 (원형)
+            const green = index % 3 ? "#23844f" : "#38a761";
+            ctx.fillStyle = green;
+            ctx.beginPath();
+            ctx.arc(x, y - 14 * scale, 29 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            // 하이라이트
+            ctx.fillStyle = "rgba(255,255,255,0.12)";
+            ctx.beginPath();
+            ctx.arc(x - 9 * scale, y - 22 * scale, 12 * scale, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      function drawEnergy(ctx, w, h, mood) {
+        if (mood.cleanEnergy > 0.28) {
+          drawTurbine(ctx, w * 0.49, h * 0.44, h * (0.16 + mood.cleanEnergy * 0.06));
+          if (mood.cleanEnergy > 0.68) drawTurbine(ctx, w * 0.93, h * 0.48, h * 0.13);
+        }
+        if (mood.pollution > 0.35) {
+          const x = w * 0.02;
+          const y = h * 0.57;
+          ctx.fillStyle = "#666b74";
+          ctx.fillRect(x, y, w * 0.05, h * 0.12);
+          ctx.beginPath();
+          ctx.moveTo(x + 8, y);
+          ctx.lineTo(x + w * 0.045, y);
+          ctx.lineTo(x + w * 0.036, y - h * 0.11);
+          ctx.lineTo(x + 16, y - h * 0.11);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = `rgba(92, 91, 88, ${0.18 + mood.pollution * 0.45})`;
+          for (let puff = 0; puff < 4; puff += 1) {
+            ctx.beginPath();
+            ctx.arc(x + 30 + puff * 18, y - h * (0.15 + puff * 0.045), 21 + puff * 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        if (mood.tech > 0.45) {
+          ctx.fillStyle = "#25b89d";
+          ctx.fillRect(w * 0.43, h * 0.53, w * 0.08, h * 0.14);
+          ctx.fillStyle = "#fff8d5";
+          ctx.font = `900 ${Math.max(18, w / 42)}px sans-serif`;
+          ctx.fillText("LAB", w * 0.444, h * 0.61);
+        }
+      }
+
+      function drawStreetLife(ctx, w, h, mood) {
+        drawLamp(ctx, w * 0.31, h * 0.74, h * 0.12, mood.energySaving);
+        drawLamp(ctx, w * 0.72, h * 0.75, h * 0.14, mood.energySaving);
+        // 차량
+        if (mood.cleanEnergy > 0.22) {
+          ctx.fillStyle = "#38b7d7";
+          roundRect(ctx, w * 0.58, h * 0.81, w * 0.12, h * 0.06, 14);
+          ctx.fill();
+          ctx.strokeStyle = "#21344c";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.fillStyle = "#dff7ff";
+          ctx.fillRect(w * 0.595, h * 0.822, w * 0.058, h * 0.022);
+          drawWheel(ctx, w * 0.605, h * 0.875, h * 0.018);
+          drawWheel(ctx, w * 0.675, h * 0.875, h * 0.018);
+          ctx.fillStyle = "#fff4bc";
+          ctx.font = "900 18px sans-serif";
+          ctx.fillText("EV", w * 0.655, h * 0.843);
+        } else {
+          ctx.fillStyle = "#b56d49";
+          roundRect(ctx, w * 0.61, h * 0.82, w * 0.1, h * 0.05, 12);
+          ctx.fill();
+          ctx.strokeStyle = "#21344c";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          drawWheel(ctx, w * 0.63, h * 0.872, h * 0.016);
+          drawWheel(ctx, w * 0.69, h * 0.872, h * 0.016);
+        }
+        // 벤치
+        if (mood.treeCover > 0.42) {
+          ctx.fillStyle = "#c8922a";
+          ctx.fillRect(w * 0.08, h * 0.9, w * 0.09, h * 0.016);
+          ctx.fillStyle = "#7a5020";
+          ctx.fillRect(w * 0.09, h * 0.916, w * 0.008, h * 0.038);
+          ctx.fillRect(w * 0.155, h * 0.916, w * 0.008, h * 0.038);
+        }
+        // 보행자
+        const personCount = 2 + Math.round(mood.cleanEnergy * 2);
+        [[0.37, 0.845, 0], [0.43, 0.862, 1], [0.50, 0.848, 2], [0.26, 0.895, 3]].slice(0, personCount).forEach(([px, py, v]) => {
+          drawPerson(ctx, w * px, h * py, h * 0.055, v);
+        });
+      }
+
+      function drawPerson(ctx, x, y, size, variant) {
+        const bodyColors = ["#e8976c", "#5b9ed4", "#d46b7c", "#6bbf8a"];
+        const bodyColor = bodyColors[variant % bodyColors.length];
+        // 그림자
+        ctx.fillStyle = "rgba(22,35,56,0.1)";
+        ctx.beginPath();
+        ctx.ellipse(x + 2, y + 1, size * 0.15, size * 0.05, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // 다리
+        ctx.fillStyle = "#3a4a6a";
+        ctx.fillRect(x - size * 0.09, y - size * 0.18, size * 0.08, size * 0.19);
+        ctx.fillRect(x + size * 0.01, y - size * 0.18, size * 0.08, size * 0.19);
+        // 몸통
+        ctx.fillStyle = bodyColor;
+        ctx.fillRect(x - size * 0.11, y - size * 0.52, size * 0.22, size * 0.36);
+        // 머리
+        ctx.fillStyle = "#f5c99a";
+        ctx.beginPath();
+        ctx.arc(x, y - size * 0.62, size * 0.13, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawLamp(ctx, x, y, height, energySaving = 0) {
+        ctx.strokeStyle = "#314057";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(x, y + height);
+        ctx.lineTo(x, y);
+        ctx.quadraticCurveTo(x, y - 18, x + 19, y - 18);
+        ctx.stroke();
+        const brightness = 1 - energySaving * 0.55;
+        // 빛 번짐 (에너지 절약 낮을수록 밝게)
+        if (brightness > 0.3) {
+          ctx.fillStyle = `rgba(255, 236, 166, ${brightness * 0.28})`;
+          ctx.beginPath();
+          ctx.arc(x + 19, y - 14, 20, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = `rgba(255, 236, 166, ${brightness})`;
+        ctx.beginPath();
+        ctx.arc(x + 19, y - 14, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawWheel(ctx, x, y, radius) {
+        ctx.fillStyle = "#21344c";
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#d7e3ef";
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawTurbine(ctx, x, y, radius) {
+        ctx.strokeStyle = "#f4fbff";
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + radius * 1.55);
+        ctx.stroke();
+        ctx.fillStyle = "#f4fbff";
+        ctx.beginPath();
+        ctx.arc(x, y, 7, 0, Math.PI * 2);
+        ctx.fill();
+        for (let blade = 0; blade < 3; blade += 1) {
+          const angle = blade * Math.PI * 2 / 3 - Math.PI / 2;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+          ctx.stroke();
+        }
+      }
+
+      function drawHeat(ctx, w, h, heatRisk, pollution) {
+        ctx.fillStyle = `rgba(226, 88, 47, ${heatRisk * 0.18})`;
+        ctx.fillRect(0, 0, w, h);
+        if (heatRisk < 0.42) return;
+        ctx.strokeStyle = `rgba(255, 239, 181, ${heatRisk * 0.65})`;
+        ctx.lineWidth = 4;
+        for (let line = 0; line < 6; line += 1) {
+          const y = h * (0.16 + line * 0.1);
+          ctx.beginPath();
+          ctx.moveTo(w * 0.1, y);
+          ctx.bezierCurveTo(w * 0.3, y - 13, w * 0.52, y + 13, w * 0.76, y - 8);
+          ctx.stroke();
+        }
+        ctx.fillStyle = `rgba(84, 77, 67, ${pollution * 0.08})`;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      function openReport() {
+        els.turnScreen.hidden = true;
+        els.reportScreen.hidden = false;
+        els.reportTitle.textContent = `${game.cityName} 2100년 기후 결과 보고서`;
+        updateReport();
+      }
+
+      function updateReflections() {
+        game.reflections = {
+          strategy: els.strategy.value.trim(),
+          science: els.science.value.trim(),
+          tradeoff: els.tradeoff.value.trim()
+        };
+      }
+
+      function updateReport() {
+        updateReflections();
+        const simulation = simulate(game.history);
+        const final = addEventScores(simulation.final);
+        drawReport(els.reportCanvas, simulation, final);
+      }
+
+      function drawReport(canvas, simulation, final) {
+        const ctx = canvas.getContext("2d");
+        const summaryLayout = buildReportSummaryLayout(ctx);
+        if (canvas.height !== summaryLayout.canvasHeight) {
+          canvas.height = summaryLayout.canvasHeight;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#fffdf5";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#21344c";
+        ctx.fillRect(0, 0, canvas.width, 150);
+        ctx.fillStyle = "#fff5c9";
+        ctx.font = "900 64px sans-serif";
+        ctx.fillText(`${game.cityName} 2100년 기후 결과 보고서`, 64, 92);
+        ctx.font = "800 30px sans-serif";
+        ctx.fillText("정책 선택 -> 배출량 -> 대기 중 농도 -> 기온 변화", 66, 131);
+        drawCityReport(ctx, final);
+        drawReportMetrics(ctx, final);
+        drawReportGraphs(ctx, simulation);
+        drawReportSummary(ctx, summaryLayout);
+      }
+
+      function drawCityReport(ctx, final) {
+        const buffer = document.createElement("canvas");
+        buffer.width = 980;
+        buffer.height = 540;
+        drawCity(buffer, cityMood(final, game.draft), game.cityName);
+        ctx.drawImage(buffer, 64, 190, 1272, 700);
+      }
+
+      function drawReportMetrics(ctx, final) {
+        const pass = successChecks(final);
+        const cards = [
+          ["2100년 기온 변화", `${final.temperature.toFixed(2)}도`, pass.temperature ? "목표 달성" : "2.0도 초과"],
+          ["온실가스 농도", `${final.concentration.toFixed(1)} ppm`, "대기 중 농도"],
+          ["도시 발전도", `${Math.round(final.development)}점`, pass.development ? "성장 유지" : "성장 부족"]
+        ];
+        cards.forEach((card, index) => {
+          const x = 64 + index * 424;
+          ctx.fillStyle = "#fff0b9";
+          roundRect(ctx, x, 920, 396, 150, 8);
+          ctx.fill();
+          ctx.strokeStyle = "#21344c";
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          ctx.fillStyle = "#52637a";
+          ctx.font = "800 24px sans-serif";
+          ctx.fillText(card[0], x + 20, 964);
+          ctx.fillStyle = "#162338";
+          ctx.font = "1000 40px sans-serif";
+          ctx.fillText(card[1], x + 20, 1017);
+          ctx.fillStyle = "#52637a";
+          ctx.font = "800 20px sans-serif";
+          ctx.fillText(card[2], x + 20, 1048);
+        });
+      }
+
+      function drawReportGraphs(ctx, simulation) {
+        const graphSpecs = [
+          ["온실가스 배출량", "emissions", "#297ad6", [0, 65], "Gt"],
+          ["대기 중 농도", "concentration", "#8c4ab8", [410, 660], "ppm"],
+          ["기온 변화", "temperature", "#d24a3c", [1, 3.8], "도"]
+        ];
+        graphSpecs.forEach((spec, index) => {
+          const buffer = document.createElement("canvas");
+          buffer.width = 360;
+          buffer.height = 240;
+          drawChart(buffer, simulation.series, spec[1], spec[2], spec[4], spec[3]);
+          const x = 64 + index * 424;
+          ctx.fillStyle = "#162338";
+          ctx.font = "900 26px sans-serif";
+          ctx.fillText(spec[0], x, 1134);
+          ctx.drawImage(buffer, x, 1150, 360, 240);
+        });
+      }
+
+      function drawReportSummary(ctx, layout) {
+        ctx.fillStyle = "#eaf9ff";
+        roundRect(ctx, 64, layout.summaryY, 1272, layout.summaryHeight, 8);
+        ctx.fill();
+        ctx.strokeStyle = "#21344c";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.fillStyle = "#162338";
+        ctx.font = "900 30px sans-serif";
+        ctx.fillText("최종 정책과 모둠 해석", 92, 1468);
+        drawSummaryRow(ctx, "최종 정책", policySummary(), layout.rows.policy);
+        drawSummaryRow(ctx, "이벤트 선택", eventSummary(), layout.rows.event);
+        drawSummaryRow(ctx, "핵심 전략", reflectionText("strategy"), layout.rows.strategy);
+        drawSummaryRow(ctx, "과학 해석", reflectionText("science"), layout.rows.science);
+        drawSummaryRow(ctx, "고민한 선택", reflectionText("tradeoff"), layout.rows.tradeoff);
+      }
+
+      function buildReportSummaryLayout(ctx) {
+        ctx.font = "800 20px sans-serif";
+        const measureText = (text) => ctx.measureText(text).width;
+        const cardHeight = (text, width, minHeight) => {
+          const lines = wrappedLineCount(text, width - 32, measureText);
+          return Math.max(minHeight, 55 + (lines - 1) * 27 + 18);
+        };
+        const policy = { x: 92, y: 1492, width: 1170 };
+        policy.height = cardHeight(policySummary(), policy.width, 64);
+        const event = { x: 92, y: policy.y + policy.height + 8, width: 1170 };
+        event.height = cardHeight(eventSummary(), event.width, 56);
+        const strategy = { x: 92, y: event.y + event.height + 8, width: 560 };
+        strategy.height = cardHeight(reflectionText("strategy"), strategy.width, 104);
+        const science = { x: 684, y: strategy.y, width: 560 };
+        science.height = cardHeight(reflectionText("science"), science.width, 104);
+        const reflectionHeight = Math.max(strategy.height, science.height);
+        strategy.height = reflectionHeight;
+        science.height = reflectionHeight;
+        const tradeoff = { x: 92, y: strategy.y + reflectionHeight + 8, width: 1152 };
+        tradeoff.height = cardHeight(reflectionText("tradeoff"), tradeoff.width, 76);
+        const summaryY = 1422;
+        const summaryHeight = tradeoff.y + tradeoff.height - summaryY + 20;
+
+        return {
+          summaryY,
+          summaryHeight,
+          canvasHeight: Math.max(1840, summaryY + summaryHeight + 18),
+          rows: { policy, event, strategy, science, tradeoff }
+        };
+      }
+
+      function reflectionText(key) {
+        return game.reflections[key] || "아직 작성하지 않음";
+      }
+
+      function drawSummaryRow(ctx, label, value, row) {
+        const { x, y, width, height } = row;
+        if (height > 0) {
+          ctx.fillStyle = "#fffdf5";
+          roundRect(ctx, x, y, width, height, 8);
+          ctx.fill();
+          ctx.strokeStyle = "#b7cbd6";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        ctx.fillStyle = "#52637a";
+        ctx.font = "900 19px sans-serif";
+        ctx.fillText(label, x + 16, y + 28);
+        ctx.fillStyle = "#162338";
+        ctx.font = "800 20px sans-serif";
+        wrapText(ctx, value, x + 16, y + 55, width - 32, 27);
+      }
+
+      function policySummary() {
+        return Object.entries(policies).map(([key, policy]) => `${policy.label} ${game.draft[key]}`).join(" | ");
+      }
+
+      function eventSummary() {
+        const selected = Object.entries(game.eventChoices).map(([eventKey, choiceKey]) => {
+          return `${events[eventKey].year} ${events[eventKey].choices[choiceKey].label}`;
+        });
+        return selected.join(" | ") || "선택 이벤트 없음";
+      }
+
+      function successChecks(final) {
+        return {
+          temperature: final.temperature <= TARGET.temperature,
+          development: final.development >= TARGET.development
+        };
+      }
+
+      function downloadReport() {
+        updateReport();
+        const link = document.createElement("a");
+        link.download = `${safeFileName(game.cityName)}-2100-보고서.png`;
+        link.href = els.reportCanvas.toDataURL("image/png");
+        link.click();
+      }
+
+      function wrappedLineCount(text, maxWidth, measureText) {
+        let lines = 0;
+        String(text || "").split("\n").forEach((paragraph) => {
+          if (!paragraph) {
+            lines += 1;
+            return;
+          }
+          let line = "";
+          for (const char of paragraph) {
+            const next = line + char;
+            if (measureText(next) <= maxWidth || !line) {
+              line = next;
+              continue;
+            }
+            lines += 1;
+            line = char;
+          }
+          if (line) lines += 1;
+        });
+        return Math.max(lines, 1);
+      }
+
+      function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+        let cursorY = y;
+        String(text || "").split("\n").forEach((paragraph) => {
+          if (!paragraph) {
+            cursorY += lineHeight;
+            return;
+          }
+          let line = "";
+          for (const char of paragraph) {
+            const next = line + char;
+            if (ctx.measureText(next).width <= maxWidth || !line) {
+              line = next;
+              continue;
+            }
+            ctx.fillText(line, x, cursorY);
+            line = char;
+            cursorY += lineHeight;
+          }
+          if (line) {
+            ctx.fillText(line, x, cursorY);
+            cursorY += lineHeight;
+          }
+        });
+      }
+
+      function safeFileName(value) {
+        return value.replace(/[\\/:*?"<>|]/g, "").trim() || "climate-city";
+      }
+
+      function roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+      }
+
+      function blend(from, to, amount) {
+        const a = hexRgb(from);
+        const b = hexRgb(to);
+        const mixed = a.map((channel, index) => Math.round(channel + (b[index] - channel) * amount));
+        return `rgb(${mixed.join(",")})`;
+      }
+
+      function hexRgb(value) {
+        return [1, 3, 5].map((start) => Number.parseInt(value.slice(start, start + 2), 16));
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function round1(value) {
+        return Math.round(value * 10) / 10;
+      }
+
+      function round2(value) {
+        return Math.round(value * 100) / 100;
+      }
+    })();
+  </script>
+</body>
+</html>
