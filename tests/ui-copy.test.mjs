@@ -22,3 +22,11 @@ test("policy interaction stays on partial refresh instead of re-rendering the wh
   assert.match(html, /function updatePolicy\(event\)[\s\S]*syncPolicyCards\(\);[\s\S]*renderScenario\(\);/);
   assert.match(html, /function toggleApproval\(event\)[\s\S]*syncPolicyCards\(\);[\s\S]*renderScenario\(\);/);
 });
+
+test("approval count message is refreshed on turn changes and approval edits", () => {
+  assert.match(html, /function updateApprovalMessage\(\)/);
+  assert.match(html, /function renderTurn\(\)[\s\S]*updateApprovalMessage\(\);/);
+  assert.match(html, /function updatePolicy\(event\)[\s\S]*updateApprovalMessage\(\);/);
+  assert.match(html, /function toggleApproval\(event\)[\s\S]*updateApprovalMessage\(\);/);
+  assert.match(html, /function commitTurn\(\)[\s\S]*updateApprovalMessage\(\);/);
+});

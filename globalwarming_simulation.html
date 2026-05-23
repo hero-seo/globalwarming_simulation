@@ -969,6 +969,14 @@
         return Object.values(game.approvals).filter((approvers) => approvers.includes(role)).length;
       }
 
+      function updateApprovalMessage() {
+        const counts = Object.keys(roles).map((r) => {
+          const used = ministerApprovalCount(r);
+          return `${roles[r]} <b style="color:${used >= 2 ? 'var(--red)' : 'var(--ink)'}">${used}/2</b>`;
+        }).join(' &thinsp;·&thinsp; ');
+        els.message.innerHTML = `레벨 3 이상 정책은 부처 승인 필요 &nbsp;·&nbsp; 예산 초과는 경제부 대출<br><small>장관별 승인 횟수: ${counts}</small>`;
+      }
+
       function renderTurn() {
         const year = TURNS[game.turnIndex];
         els.year.textContent = year;
@@ -976,11 +984,7 @@
         els.turnPath.innerHTML = YEARS.map((item) => `<span class="turn-chip${item === year ? " current" : ""}">${item}</span>`).join("");
         els.policyGrid.innerHTML = Object.entries(policies).map(([key, policy]) => policyCard(key, policy)).join("");
         syncPolicyCards();
-        const counts = Object.keys(roles).map((r) => {
-          const used = ministerApprovalCount(r);
-          return `${roles[r]} <b style="color:${used >= 2 ? 'var(--red)' : 'var(--ink)'}">${used}/2</b>`;
-        }).join(' &thinsp;·&thinsp; ');
-        els.message.innerHTML = `레벨 3 이상 정책은 부처 승인 필요 &nbsp;·&nbsp; 예산 초과는 경제부 대출<br><small>장관별 승인 횟수: ${counts}</small>`;
+        updateApprovalMessage();
         renderScenario();
       }
 
@@ -1004,6 +1008,7 @@
         game.approvals[key] = [];
         game.budgetApproval = false;
         syncPolicyCards();
+        updateApprovalMessage();
         renderScenario();
       }
 
@@ -1023,6 +1028,7 @@
         }
         game.approvals[key] = [...current];
         syncPolicyCards();
+        updateApprovalMessage();
         renderScenario();
       }
 
@@ -1089,6 +1095,7 @@
         game.turnIndex += 1;
         game.approvals = {};
         game.budgetApproval = false;
+        updateApprovalMessage();
 
         if (game.turnIndex >= TURNS.length) {
           openReport();
