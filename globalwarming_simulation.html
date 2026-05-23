@@ -975,6 +975,7 @@
         els.cityHeading.textContent = `${game.cityName} 정책 회의`;
         els.turnPath.innerHTML = YEARS.map((item) => `<span class="turn-chip${item === year ? " current" : ""}">${item}</span>`).join("");
         els.policyGrid.innerHTML = Object.entries(policies).map(([key, policy]) => policyCard(key, policy)).join("");
+        syncPolicyCards();
         const counts = Object.keys(roles).map((r) => {
           const used = ministerApprovalCount(r);
           return `${roles[r]} <b style="color:${used >= 2 ? 'var(--red)' : 'var(--ink)'}">${used}/2</b>`;
@@ -985,28 +986,13 @@
 
       function policyCard(key, policy) {
         const level = game.draft[key];
-        const approvals = game.approvals[key] ?? [];
-        const devDelta = policy.development * level;
-        const devColor = devDelta > 0 ? "var(--mint)" : devDelta < 0 ? "var(--red)" : "var(--muted)";
-        const devText = devDelta > 0 ? `+${devDelta}` : `${devDelta}`;
-        const approvalMarkup = level < 3
-          ? `<span class="approval-ok">완만한 조정은 바로 적용</span>`
-          : policy.approvers.map((role) => {
-              const isApproved = approvals.includes(role);
-              const isMaxed = !isApproved && ministerApprovalCount(role) >= 2;
-              return `<button type="button" data-policy="${key}" data-role="${role}"
-                class="${isApproved ? "approved" : ""}" ${isMaxed ? "disabled" : ""}>
-                ${roles[role]} ${isApproved ? "승인됨" : isMaxed ? "한도초과" : "승인"}
-              </button>`;
-            }).join("");
-
         return `
-          <article class="policy-card">
-            <div class="policy-head"><strong>${policy.label}</strong><output class="level">${level}</output></div>
-            <p>${policy.hint}</p>
-            <p style="margin:0;font-size:12px;color:var(--muted);">발전도 영향 <strong style="color:${devColor}">${devDelta !== 0 ? devText : "없음"}</strong> <span style="opacity:.7">(레벨당 ${policy.development > 0 ? "+" : ""}${policy.development})</span></p>
+          <article class="policy-card" data-policy-card="${key}">
+            <div class="policy-head"><strong data-policy-label>${policy.label}</strong><output class="level" data-policy-level>${game.draft[key]}</output></div>
+            <p data-policy-hint>${policy.hint}</p>
+            <p data-policy-dev style="margin:0;font-size:12px;color:var(--muted);">발전도 영향 <strong data-policy-dev-value></strong> <span data-policy-dev-rate style="opacity:.7"></span></p>
             <input aria-label="${policy.label}" data-slider="${key}" type="range" min="0" max="4" step="1" value="${level}">
-            <div class="approval-row">${approvalMarkup}</div>
+            <div class="approval-row" data-policy-approvals></div>
           </article>
         `;
       }
@@ -1017,7 +1003,8 @@
         game.draft[key] = clamp(Number(event.target.value), 0, 4);
         game.approvals[key] = [];
         game.budgetApproval = false;
-        renderTurn();
+        syncPolicyCards();
+        renderScenario();
       }
 
       function toggleApproval(event) {
@@ -1035,7 +1022,49 @@
           current.add(role);
         }
         game.approvals[key] = [...current];
-        renderTurn();
+        syncPolicyCards();
+        renderScenario();
+      }
+
+      function syncPolicyCards() {
+        Object.entries(policies).forEach(([key, policy]) => {
+          const card = els.policyGrid.querySelector(`[data-policy-card="${key}"]`);
+          if (!card) return;
+          const level = game.draft[key];
+          const approvals = game.approvals[key] ?? [];
+          const devDelta = policy.development * level;
+          const devColor = devDelta > 0 ? "var(--mint)" : devDelta < 0 ? "var(--red)" : "var(--muted)";
+          const devText = devDelta > 0 ? `+${devDelta}` : `${devDelta}`;
+          const levelEl = card.querySelector("[data-policy-level]");
+          const hintEl = card.querySelector("[data-policy-hint]");
+          const devValueEl = card.querySelector("[data-policy-dev-value]");
+          const devRateEl = card.querySelector("[data-policy-dev-rate]");
+          const slider = card.querySelector(`[data-slider="${key}"]`);
+          const approvalsEl = card.querySelector("[data-policy-approvals]");
+
+          if (levelEl) levelEl.textContent = level;
+          if (hintEl) hintEl.textContent = policy.hint;
+          if (devValueEl) {
+            devValueEl.style.color = devColor;
+            devValueEl.textContent = devDelta !== 0 ? devText : "없음";
+          }
+          if (devRateEl) {
+            devRateEl.textContent = `(레벨당 ${policy.development > 0 ? "+" : ""}${policy.development})`;
+          }
+          if (slider) slider.value = level;
+          if (approvalsEl) {
+            approvalsEl.innerHTML = level < 3
+              ? `<span class="approval-ok">완만한 조정은 바로 적용</span>`
+              : policy.approvers.map((role) => {
+                  const isApproved = approvals.includes(role);
+                  const isMaxed = !isApproved && ministerApprovalCount(role) >= 2;
+                  return `<button type="button" data-policy="${key}" data-role="${role}"
+                    class="${isApproved ? "approved" : ""}" ${isMaxed ? "disabled" : ""}>
+                    ${roles[role]} ${isApproved ? "승인됨" : isMaxed ? "한도초과" : "승인"}
+                  </button>`;
+                }).join("");
+          }
+        });
       }
 
       function commitTurn() {
@@ -1925,8 +1954,6 @@
         ctx.fillStyle = "#fff5c9";
         ctx.font = "900 64px sans-serif";
         ctx.fillText(`${game.cityName} 2100년 기후 결과 보고서`, 64, 92);
-        ctx.font = "800 30px sans-serif";
-        ctx.fillText("정책 선택 -> 배출량 -> 대기 중 농도 -> 기온 변화", 66, 131);
         drawCityReport(ctx, final);
         drawReportMetrics(ctx, final);
         drawReportGraphs(ctx, simulation);
@@ -2017,12 +2044,12 @@
         event.height = cardHeight(eventSummary(), event.width, 56);
         const strategy = { x: 92, y: event.y + event.height + 8, width: 560 };
         strategy.height = cardHeight(reflectionText("strategy"), strategy.width, 104);
-        const science = { x: 684, y: strategy.y, width: 560 };
+        const science = { x: 684, y: strategy.y, width: 578 };
         science.height = cardHeight(reflectionText("science"), science.width, 104);
         const reflectionHeight = Math.max(strategy.height, science.height);
         strategy.height = reflectionHeight;
         science.height = reflectionHeight;
-        const tradeoff = { x: 92, y: strategy.y + reflectionHeight + 8, width: 1152 };
+        const tradeoff = { x: 92, y: strategy.y + reflectionHeight + 8, width: 1170 };
         tradeoff.height = cardHeight(reflectionText("tradeoff"), tradeoff.width, 76);
         const summaryY = 1422;
         const summaryHeight = tradeoff.y + tradeoff.height - summaryY + 20;

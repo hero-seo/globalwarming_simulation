@@ -44,12 +44,12 @@ export function buildReportSummaryLayout({ measureText, policyText, eventText, r
   event.height = heightFor(eventText, event.width, 56);
   const strategy = { x: 92, y: event.y + event.height + ROW_GAP, width: 560 };
   strategy.height = heightFor(reflections.strategy, strategy.width, 104);
-  const science = { x: 684, y: strategy.y, width: 560 };
+  const science = { x: 684, y: strategy.y, width: 578 };
   science.height = heightFor(reflections.science, science.width, 104);
   const reflectionHeight = Math.max(strategy.height, science.height);
   strategy.height = reflectionHeight;
   science.height = reflectionHeight;
-  const tradeoff = { x: 92, y: strategy.y + reflectionHeight + ROW_GAP, width: 1152 };
+  const tradeoff = { x: 92, y: strategy.y + reflectionHeight + ROW_GAP, width: 1170 };
   tradeoff.height = heightFor(reflections.tradeoff, tradeoff.width, 76);
   const summaryHeight = tradeoff.y + tradeoff.height - SUMMARY_Y + 20;
 

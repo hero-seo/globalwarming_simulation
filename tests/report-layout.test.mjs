@@ -36,3 +36,20 @@ test("long reflections grow report summary cards and PNG height", () => {
   assert.ok(longLayout.rows.tradeoff.y > longLayout.rows.strategy.y + longLayout.rows.strategy.height);
   assert.ok(longLayout.canvasHeight > shortLayout.canvasHeight);
 });
+
+test("science and tradeoff cards align to the right edge of the top cards", () => {
+  const layout = buildReportSummaryLayout({
+    measureText: measureMono,
+    policyText: "정책",
+    eventText: "이벤트",
+    reflections: {
+      strategy: "짧은 전략",
+      science: "짧은 해석",
+      tradeoff: "짧은 선택"
+    }
+  });
+
+  assert.equal(layout.rows.policy.x + layout.rows.policy.width, layout.rows.event.x + layout.rows.event.width);
+  assert.equal(layout.rows.science.x + layout.rows.science.width, layout.rows.policy.x + layout.rows.policy.width);
+  assert.equal(layout.rows.tradeoff.x + layout.rows.tradeoff.width, layout.rows.policy.x + layout.rows.policy.width);
+});
