@@ -61,3 +61,19 @@ test("committing a turn asks for confirmation before advancing", () => {
   assert.match(html, /function confirmCommitTurn\(\)[\s\S]*commitTurn\(\);/);
   assert.doesNotMatch(html, /confirm\(/);
 });
+
+test("event choices show budget, city development, and concentration impact", () => {
+  assert.match(html, /function eventChoiceImpact\(eventKey, choiceKey\)/);
+  assert.match(html, /class="event-choice-metrics"/);
+  assert.match(html, /\.event-choice strong[\s\S]*font-size: 19px/);
+  assert.match(html, /\.event-choice-metrics[\s\S]*font-size: 14px/);
+  assert.match(html, /도시 발전도/);
+  assert.match(html, /예산 사용/);
+  assert.match(html, /2100년 온실기체 농도/);
+  assert.match(html, /signedConcentration/);
+});
+
+test("first event choices have balanced tradeoffs", () => {
+  assert.match(html, /fossilBackup:[\s\S]*budget: 1, burden: -3, development: 7, emissionsModifier: 0\.025/);
+  assert.match(html, /cleanBuildout:[\s\S]*budget: 8, burden: 2, development: 3, renewablesBoost: 1, efficiencyBoost: 1/);
+});

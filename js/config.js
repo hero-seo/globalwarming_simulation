@@ -76,20 +76,20 @@ export const EVENTS = {
     choices: {
       fossilBackup: {
         label: "값싼 화석연료 발전을 일부 유지",
-        description: "예산과 부담은 줄지만 배출 감축이 늦어진다.",
-        budget: 2,
-        burden: -2,
-        emissionsModifier: 0.04,
-        development: 3
+        description: "예산을 크게 아끼고 성장은 빠르지만 농도는 더 불리해진다.",
+        budget: 1,
+        burden: -3,
+        emissionsModifier: 0.025,
+        development: 7
       },
       cleanBuildout: {
         label: "재생에너지와 효율 설비 확대",
-        description: "예산을 더 쓰지만 이후 배출 감축에 도움이 된다.",
-        budget: 9,
+        description: "예산 부담은 크지만 이후 온실기체 농도를 낮추는 데 유리하다.",
+        budget: 8,
         burden: 2,
         renewablesBoost: 1,
         efficiencyBoost: 1,
-        development: 4
+        development: 3
       }
     }
   },
