@@ -1,6 +1,7 @@
 import {
   BORROW_LIMIT_PER_TURN,
   EVENTS,
+  MAINTENANCE_RATE,
   POLICY_EFFECTS,
   POLICY_MAX,
   POLICY_META,
@@ -128,7 +129,9 @@ function calculatePolicyIncreaseSpend(game) {
   const previous = game.history.at(-1)?.policies ?? zeroPolicies();
   return Object.keys(POLICY_META).reduce((sum, key) => {
     const increase = Math.max(0, game.draftPolicies[key] - previous[key]);
-    return sum + increase * POLICY_EFFECTS[key].budget;
+    const maintained = Math.min(game.draftPolicies[key], previous[key]);
+    return sum + increase * POLICY_EFFECTS[key].budget
+      + maintained * POLICY_EFFECTS[key].budget * MAINTENANCE_RATE;
   }, 0);
 }
 

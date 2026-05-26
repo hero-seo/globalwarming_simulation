@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { BORROW_LIMIT_PER_TURN, TURN_BUDGET } from "../js/config.js";
+import { BORROW_LIMIT_PER_TURN, MAINTENANCE_RATE, TURN_BUDGET } from "../js/config.js";
 import {
   approveBudgetLoan,
   commitTurn,
@@ -9,7 +9,7 @@ import {
   setDraftPolicy
 } from "../js/state.js";
 
-test("a turn pays for policy increases instead of carried policy levels", () => {
+test("a turn pays full cost for increases and maintenance for carried policy levels", () => {
   let game = createGame("해솔시");
   game = setDraftPolicy(game, "renewables", 2);
 
@@ -17,7 +17,21 @@ test("a turn pays for policy increases instead of carried policy levels", () => 
 
   game = commitTurn(game);
 
-  assert.equal(getTurnBudgetStatus(game).spend, 0);
+  assert.equal(getTurnBudgetStatus(game).spend, 18 * MAINTENANCE_RATE);
+});
+
+test("a policy lowered and raised again pays maintenance plus the new increase", () => {
+  let game = createGame("해솔시");
+  game = setDraftPolicy(game, "renewables", 4);
+  game = approveBudgetLoan(game);
+  game = commitTurn(game);
+
+  game = setDraftPolicy(game, "renewables", 2);
+  assert.equal(getTurnBudgetStatus(game).spend, 18 * MAINTENANCE_RATE);
+  game = commitTurn(game);
+
+  game = setDraftPolicy(game, "renewables", 4);
+  assert.equal(getTurnBudgetStatus(game).spend, 18 + 18 * MAINTENANCE_RATE);
 });
 
 test("economy approval borrows a capped shortfall from the next turn", () => {

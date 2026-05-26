@@ -33,6 +33,9 @@ test("approval count message is refreshed on turn changes and approval edits", (
 
 test("policy cards show budget cost beside development impact", () => {
   assert.match(html, /도시 발전도[\s\S]*예산 사용/);
+  assert.match(html, /유지비/);
+  assert.match(html, /MAINTENANCE_RATE = 0\.25/);
+  assert.match(html, /policyBudgetInfo\(key, policy, level\)/);
   assert.doesNotMatch(html, /발전도 영향/);
   assert.match(html, /data-policy-budget-value/);
   assert.match(html, /policy\.budget/);
