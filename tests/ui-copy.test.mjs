@@ -50,3 +50,14 @@ test("fullscreen mode has a css fallback that survives native fullscreen exit", 
   assert.match(html, /function isFullscreenActive\(\)[\s\S]*app-fullscreen/);
   assert.doesNotMatch(html, /els\.fullscreen\.hidden = true/);
 });
+
+test("committing a turn asks for confirmation before advancing", () => {
+  assert.match(html, /이대로 정책을 확정하시겠습니까\?/);
+  assert.match(html, /id="commit-confirm-dialog"/);
+  assert.match(html, /#commit-confirm-dialog[\s\S]*width: min\(520px, calc\(100% - 32px\)\)/);
+  assert.match(html, /class="commit-confirm-box"/);
+  assert.match(html, /class="commit-confirm-actions"/);
+  assert.match(html, /addEventListener\("click", requestCommitTurn\)/);
+  assert.match(html, /function confirmCommitTurn\(\)[\s\S]*commitTurn\(\);/);
+  assert.doesNotMatch(html, /confirm\(/);
+});

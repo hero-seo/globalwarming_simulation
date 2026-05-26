@@ -483,6 +483,10 @@
       background: rgba(10, 25, 42, 0.55);
     }
 
+    #commit-confirm-dialog {
+      width: min(520px, calc(100% - 32px));
+    }
+
     .event-box {
       display: grid;
       gap: 12px;
@@ -492,6 +496,27 @@
     .event-box h2,
     .event-box p {
       margin: 0;
+    }
+
+    .commit-confirm-box {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 16px 18px 14px;
+      text-align: center;
+    }
+
+    .commit-confirm-box h2,
+    .commit-confirm-box p {
+      margin: 0;
+    }
+
+    .commit-confirm-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 4px;
     }
 
     .event-choices {
@@ -748,6 +773,18 @@
     </section>
   </dialog>
 
+  <dialog id="commit-confirm-dialog">
+    <section class="commit-confirm-box">
+      <strong>정책 확정 확인</strong>
+      <h2>이대로 정책을 확정하시겠습니까?</h2>
+      <p>확정하면 다음 연도로 넘어가며, 이번 턴의 정책 선택은 기록된다.</p>
+      <div class="commit-confirm-actions">
+        <button id="commit-cancel-button" class="secondary" type="button">다시 조정</button>
+        <button id="commit-confirm-button" class="good" type="button">정책 확정</button>
+      </div>
+    </section>
+  </dialog>
+
   <script>
     (() => {
       "use strict";
@@ -873,6 +910,9 @@
         eventTitle: document.querySelector("#event-title"),
         eventText: document.querySelector("#event-text"),
         eventChoices: document.querySelector("#event-choices"),
+        commitConfirmDialog: document.querySelector("#commit-confirm-dialog"),
+        commitConfirmButton: document.querySelector("#commit-confirm-button"),
+        commitCancelButton: document.querySelector("#commit-cancel-button"),
         reportTitle: document.querySelector("#report-title"),
         reportCanvas: document.querySelector("#report-canvas"),
         strategy: document.querySelector("#strategy-input"),
@@ -893,7 +933,9 @@
       });
       els.policyGrid.addEventListener("input", updatePolicy);
       els.policyGrid.addEventListener("click", toggleApproval);
-      els.commitButton.addEventListener("click", commitTurn);
+      els.commitButton.addEventListener("click", requestCommitTurn);
+      els.commitConfirmButton.addEventListener("click", confirmCommitTurn);
+      els.commitCancelButton.addEventListener("click", () => els.commitConfirmDialog.close());
       els.loanButton.addEventListener("click", approveBudgetLoan);
       els.refreshReport.addEventListener("click", updateReport);
       [els.strategy, els.science, els.tradeoff].forEach((input) => input.addEventListener("input", updateReflections));
@@ -1095,6 +1137,15 @@
                 }).join("");
           }
         });
+      }
+
+      function requestCommitTurn() {
+        els.commitConfirmDialog.showModal();
+      }
+
+      function confirmCommitTurn() {
+        els.commitConfirmDialog.close();
+        commitTurn();
       }
 
       function commitTurn() {
