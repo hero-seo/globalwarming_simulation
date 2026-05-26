@@ -552,19 +552,23 @@
     }
 
     html:fullscreen,
-    html:fullscreen body {
+    html:fullscreen body,
+    html.app-fullscreen,
+    html.app-fullscreen body {
       height: 100%;
       overflow: hidden;
     }
 
-    html:fullscreen .app {
+    html:fullscreen .app,
+    html.app-fullscreen .app {
       height: 100vh;
       height: 100svh;
       min-height: 0;
       overflow: hidden;
     }
 
-    html:fullscreen .turn-screen.fullscreen-fit {
+    html:fullscreen .turn-screen.fullscreen-fit,
+    html.app-fullscreen .turn-screen.fullscreen-fit {
       transform: scale(var(--fullscreen-scale, 1));
       transform-origin: top center;
       transition: transform 160ms ease;
@@ -898,9 +902,6 @@
       els.fullscreen.addEventListener("click", toggleFullscreen);
       document.addEventListener("fullscreenchange", syncFullscreenButton);
       window.addEventListener("resize", scheduleFullscreenFit);
-      if (!document.documentElement.requestFullscreen) {
-        els.fullscreen.hidden = true;
-      }
 
       function startGame() {
         const cityName = els.cityName.value.trim() || "우리 기후 도시";
@@ -923,20 +924,33 @@
       }
 
       async function toggleFullscreen() {
-        try {
+        const root = document.documentElement;
+        if (isFullscreenActive()) {
+          root.classList.remove("app-fullscreen");
           if (document.fullscreenElement) {
             await document.exitFullscreen();
-          } else {
-            await document.documentElement.requestFullscreen();
           }
-        } catch (error) {
-          els.fullscreen.textContent = "전체화면 불가";
-          els.fullscreen.disabled = true;
+          syncFullscreenButton();
+          return;
         }
+
+        root.classList.add("app-fullscreen");
+        if (root.requestFullscreen && !document.fullscreenElement) {
+          try {
+            await root.requestFullscreen();
+          } catch (error) {
+            // 일부 태블릿 브라우저는 텍스트 입력과 전체화면을 함께 제한한다.
+          }
+        }
+        syncFullscreenButton();
+      }
+
+      function isFullscreenActive() {
+        return document.fullscreenElement || document.documentElement.classList.contains("app-fullscreen");
       }
 
       function syncFullscreenButton() {
-        const active = Boolean(document.fullscreenElement);
+        const active = Boolean(isFullscreenActive());
         els.fullscreen.textContent = active ? "전체화면 종료" : "전체화면";
         els.fullscreen.setAttribute("aria-pressed", String(active));
         scheduleFullscreenFit();
@@ -949,7 +963,7 @@
       function fitTurnScreenToFullscreen() {
         els.turnScreen.classList.remove("fullscreen-fit");
         els.turnScreen.style.removeProperty("--fullscreen-scale");
-        if (!document.fullscreenElement || els.turnScreen.hidden) return;
+        if (!isFullscreenActive() || els.turnScreen.hidden) return;
 
         const usableHeight = window.innerHeight - 28;
         const usableWidth = window.innerWidth - 28;

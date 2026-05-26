@@ -42,3 +42,11 @@ test("approval limit copy says approval count exceeded", () => {
   assert.match(html, /승인 횟수 초과/);
   assert.doesNotMatch(html, /한도초과/);
 });
+
+test("fullscreen mode has a css fallback that survives native fullscreen exit", () => {
+  assert.match(html, /html\.app-fullscreen/);
+  assert.match(html, /classList\.add\("app-fullscreen"\)/);
+  assert.match(html, /classList\.remove\("app-fullscreen"\)/);
+  assert.match(html, /function isFullscreenActive\(\)[\s\S]*app-fullscreen/);
+  assert.doesNotMatch(html, /els\.fullscreen\.hidden = true/);
+});
