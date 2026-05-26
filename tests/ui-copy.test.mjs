@@ -30,3 +30,15 @@ test("approval count message is refreshed on turn changes and approval edits", (
   assert.match(html, /function toggleApproval\(event\)[\s\S]*updateApprovalMessage\(\);/);
   assert.match(html, /function commitTurn\(\)[\s\S]*updateApprovalMessage\(\);/);
 });
+
+test("policy cards show budget cost beside development impact", () => {
+  assert.match(html, /도시 발전도[\s\S]*예산 사용/);
+  assert.doesNotMatch(html, /발전도 영향/);
+  assert.match(html, /data-policy-budget-value/);
+  assert.match(html, /policy\.budget/);
+});
+
+test("approval limit copy says approval count exceeded", () => {
+  assert.match(html, /승인 횟수 초과/);
+  assert.doesNotMatch(html, /한도초과/);
+});

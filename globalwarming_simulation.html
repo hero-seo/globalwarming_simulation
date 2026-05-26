@@ -994,7 +994,7 @@
           <article class="policy-card" data-policy-card="${key}">
             <div class="policy-head"><strong data-policy-label>${policy.label}</strong><output class="level" data-policy-level>${game.draft[key]}</output></div>
             <p data-policy-hint>${policy.hint}</p>
-            <p data-policy-dev style="margin:0;font-size:12px;color:var(--muted);">발전도 영향 <strong data-policy-dev-value></strong> <span data-policy-dev-rate style="opacity:.7"></span></p>
+            <p data-policy-dev style="margin:0;font-size:12px;color:var(--muted);">도시 발전도 <strong data-policy-dev-value></strong> <span data-policy-dev-rate style="opacity:.7"></span> · 예산 사용 <strong data-policy-budget-value></strong> <span data-policy-budget-rate style="opacity:.7"></span></p>
             <input aria-label="${policy.label}" data-slider="${key}" type="range" min="0" max="4" step="1" value="${level}">
             <div class="approval-row" data-policy-approvals></div>
           </article>
@@ -1039,12 +1039,15 @@
           const level = game.draft[key];
           const approvals = game.approvals[key] ?? [];
           const devDelta = policy.development * level;
+          const budgetCost = policy.budget * level;
           const devColor = devDelta > 0 ? "var(--mint)" : devDelta < 0 ? "var(--red)" : "var(--muted)";
           const devText = devDelta > 0 ? `+${devDelta}` : `${devDelta}`;
           const levelEl = card.querySelector("[data-policy-level]");
           const hintEl = card.querySelector("[data-policy-hint]");
           const devValueEl = card.querySelector("[data-policy-dev-value]");
           const devRateEl = card.querySelector("[data-policy-dev-rate]");
+          const budgetValueEl = card.querySelector("[data-policy-budget-value]");
+          const budgetRateEl = card.querySelector("[data-policy-budget-rate]");
           const slider = card.querySelector(`[data-slider="${key}"]`);
           const approvalsEl = card.querySelector("[data-policy-approvals]");
 
@@ -1057,6 +1060,13 @@
           if (devRateEl) {
             devRateEl.textContent = `(레벨당 ${policy.development > 0 ? "+" : ""}${policy.development})`;
           }
+          if (budgetValueEl) {
+            budgetValueEl.style.color = budgetCost > 0 ? "var(--gold)" : "var(--muted)";
+            budgetValueEl.textContent = budgetCost;
+          }
+          if (budgetRateEl) {
+            budgetRateEl.textContent = `(레벨당 ${policy.budget})`;
+          }
           if (slider) slider.value = level;
           if (approvalsEl) {
             approvalsEl.innerHTML = level < 3
@@ -1066,7 +1076,7 @@
                   const isMaxed = !isApproved && ministerApprovalCount(role) >= 2;
                   return `<button type="button" data-policy="${key}" data-role="${role}"
                     class="${isApproved ? "approved" : ""}" ${isMaxed ? "disabled" : ""}>
-                    ${roles[role]} ${isApproved ? "승인됨" : isMaxed ? "한도초과" : "승인"}
+                    ${roles[role]} ${isApproved ? "승인됨" : isMaxed ? "승인 횟수 초과" : "승인"}
                   </button>`;
                 }).join("");
           }
