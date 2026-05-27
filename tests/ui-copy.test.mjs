@@ -23,9 +23,12 @@ test("final report copy keeps the year labels and hides the loan metric", () => 
   assert.doesNotMatch(html, /정책 선택 -> 배출량 -> 대기 중 농도 -> 기온 변화/);
 });
 
-test("policy interaction stays on partial refresh instead of re-rendering the whole grid", () => {
-  assert.match(html, /function updatePolicy\(event\)[\s\S]*syncPolicyCards\(\);[\s\S]*renderScenario\(\);/);
-  assert.match(html, /function toggleApproval\(event\)[\s\S]*syncPolicyCards\(\);[\s\S]*renderScenario\(\);/);
+test("policy interaction refreshes controls without changing committed graphs", () => {
+  assert.match(html, /function updatePolicy\(event\)[\s\S]*syncPolicyCards\(\);[\s\S]*syncBudgetStatus\(\);/);
+  assert.match(html, /function toggleApproval\(event\)[\s\S]*syncPolicyCards\(\);[\s\S]*syncBudgetStatus\(\);/);
+  assert.doesNotMatch(html, /function updatePolicy\(event\)[\s\S]*renderScenario\(\);/);
+  assert.match(html, /function renderCommittedScenario\(\)/);
+  assert.match(html, /function committedTurns\(\)/);
 });
 
 test("approval count message is refreshed on turn changes and approval edits", () => {

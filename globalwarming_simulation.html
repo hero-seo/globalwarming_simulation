@@ -1059,7 +1059,8 @@
         els.policyGrid.innerHTML = Object.entries(policies).map(([key, policy]) => policyCard(key, policy)).join("");
         syncPolicyCards();
         updateApprovalMessage();
-        renderScenario();
+        syncBudgetStatus();
+        renderCommittedScenario();
       }
 
       function policyCard(key, policy) {
@@ -1083,7 +1084,7 @@
         game.budgetApproval = false;
         syncPolicyCards();
         updateApprovalMessage();
-        renderScenario();
+        syncBudgetStatus();
       }
 
       function toggleApproval(event) {
@@ -1103,7 +1104,7 @@
         game.approvals[key] = [...current];
         syncPolicyCards();
         updateApprovalMessage();
-        renderScenario();
+        syncBudgetStatus();
       }
 
       function syncPolicyCards() {
@@ -1310,15 +1311,23 @@
         }
         game.budgetApproval = true;
         els.message.textContent = `경제부가 ${budget.shortfall} 예산 당겨쓰기를 승인했다. 다음 턴 예산에서 차감된다.`;
-        renderScenario();
+        syncBudgetStatus();
       }
 
-      function renderScenario() {
-        const simulation = simulate(previewTurns());
+      function renderCommittedScenario() {
+        const simulation = simulate(committedTurns());
         const final = addEventScores(simulation.final);
         els.temperatureStat.textContent = `${final.temperature.toFixed(2)}도`;
         els.concentrationStat.textContent = `${final.concentration.toFixed(1)} ppm`;
         els.developmentStat.textContent = `${Math.round(final.development)}점`;
+        els.temperatureStat.style.color = final.temperature <= TARGET.temperature ? "#11745d" : "#c23f35";
+        drawChart(els.emissionsChart, simulation.series, "emissions", "#297ad6", "Gt", [0, 65]);
+        drawChart(els.concentrationChart, simulation.series, "concentration", "#8c4ab8", "ppm", [410, 660]);
+        drawChart(els.temperatureChart, simulation.series, "temperature", "#d24a3c", "도", [1, 3.8]);
+        drawCity(els.cityCanvas, cityMood(final, currentCommittedPolicies()), game.cityName);
+      }
+
+      function syncBudgetStatus() {
         const budget = turnBudgetStatus();
         els.costStat.textContent = `${budget.spend} / ${budget.baseBudget}`;
         const borrowed = totalBorrowed();
@@ -1331,16 +1340,21 @@
         els.costStat.style.color = budget.shortfall > budget.borrowable ? "#c23f35" : budget.shortfall ? "#a05b00" : "#11745d";
         els.loanButton.disabled = budget.shortfall === 0 || budget.shortfall > budget.borrowable || budget.economyApproved;
         els.loanButton.textContent = budget.economyApproved ? "경제부 대출 승인됨" : "경제부 대출 승인";
-        els.temperatureStat.style.color = final.temperature <= TARGET.temperature ? "#11745d" : "#c23f35";
-        drawChart(els.emissionsChart, simulation.series, "emissions", "#297ad6", "Gt", [0, 65]);
-        drawChart(els.concentrationChart, simulation.series, "concentration", "#8c4ab8", "ppm", [410, 660]);
-        drawChart(els.temperatureChart, simulation.series, "temperature", "#d24a3c", "도", [1, 3.8]);
-        drawCity(els.cityCanvas, cityMood(final, game.draft), game.cityName);
       }
 
       function previewTurns() {
         const year = TURNS[game.turnIndex];
         return [...game.history, { year, policies: { ...game.draft } }];
+      }
+
+      function committedTurns() {
+        return game.history.length
+          ? game.history
+          : [{ year: TURNS[0], policies: zeroPolicies() }];
+      }
+
+      function currentCommittedPolicies() {
+        return game.history.at(-1)?.policies ?? zeroPolicies();
       }
 
       function applyEventBoosts(active, year) {
