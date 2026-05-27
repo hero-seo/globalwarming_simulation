@@ -774,7 +774,6 @@
         <div class="report-actions">
           <button id="refresh-report" class="secondary" type="button">보고서 반영</button>
           <button id="download-report" class="good" type="button">PNG 보고서 저장</button>
-          <button id="restart-button" type="button">새 도시 시작</button>
         </div>
       </section>
       <canvas id="report-canvas" width="1400" height="1840" aria-label="저장할 보고서 미리보기"></canvas>
@@ -938,7 +937,6 @@
         tradeoff: document.querySelector("#tradeoff-input"),
         refreshReport: document.querySelector("#refresh-report"),
         downloadReport: document.querySelector("#download-report"),
-        restart: document.querySelector("#restart-button"),
         fullscreen: document.querySelector("#fullscreen-button")
       };
 
@@ -958,7 +956,6 @@
       els.refreshReport.addEventListener("click", updateReport);
       [els.strategy, els.science, els.tradeoff].forEach((input) => input.addEventListener("input", updateReflections));
       els.downloadReport.addEventListener("click", downloadReport);
-      els.restart.addEventListener("click", () => location.reload());
       els.fullscreen.addEventListener("click", toggleFullscreen);
       document.addEventListener("fullscreenchange", syncFullscreenButton);
       window.addEventListener("resize", scheduleFullscreenFit);

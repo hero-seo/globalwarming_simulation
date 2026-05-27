@@ -21,6 +21,7 @@ test("final report copy keeps the year labels and hides the loan metric", () => 
   assert.match(html, /2100년 기온 변화/);
   assert.doesNotMatch(html, /\["누적 대출"/);
   assert.doesNotMatch(html, /정책 선택 -> 배출량 -> 대기 중 농도 -> 기온 변화/);
+  assert.doesNotMatch(html, /새 도시 시작|restart-button|els\.restart/);
 });
 
 test("policy interaction refreshes controls without changing committed graphs", () => {
