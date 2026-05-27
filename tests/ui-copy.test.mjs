@@ -40,12 +40,12 @@ test("approval count message is refreshed on turn changes and approval edits", (
   assert.match(html, /function commitTurn\(\)[\s\S]*updateApprovalMessage\(\);/);
 });
 
-test("policy cards show budget cost beside development impact", () => {
-  assert.match(html, /도시 발전도[\s\S]*예산 사용/);
+test("policy cards show budget cost without immediate development impact", () => {
   assert.match(html, /유지비/);
-  assert.match(html, /MAINTENANCE_RATE = 0\.25/);
+  assert.match(html, /MAINTENANCE_RATE = 0\.5/);
   assert.match(html, /policyBudgetInfo\(key, policy, level\)/);
   assert.doesNotMatch(html, /발전도 영향/);
+  assert.doesNotMatch(html, /data-policy-dev|data-policy-dev-value|data-policy-dev-rate/);
   assert.match(html, /data-policy-budget-value/);
   assert.match(html, /policy\.budget/);
 });

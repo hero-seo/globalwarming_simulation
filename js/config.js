@@ -6,7 +6,7 @@ export const POLICY_MAX = 4;
 export const TURN_BUDGET = 40;
 export const BORROW_LIMIT_PER_TURN = 12;
 export const TOTAL_BORROW_LIMIT = 24;
-export const MAINTENANCE_RATE = 0.25;
+export const MAINTENANCE_RATE = 0.5;
 
 export const ROLES = [
   { id: "environment", label: "환경부 장관" },
