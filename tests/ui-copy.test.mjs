@@ -11,6 +11,11 @@ test("classroom copy names the game and the city growth threshold clearly", () =
   assert.doesNotMatch(html, /낮으면 성장 부족/);
 });
 
+test("greenhouse gas wording consistently uses 온실 기체", () => {
+  assert.match(html, /온실 기체/);
+  assert.doesNotMatch(html, /온실 ?가스|온실기체/);
+});
+
 test("final report copy keeps the year labels and hides the loan metric", () => {
   assert.match(html, /\$\{game\.cityName\} 2100년 기후 결과 보고서/);
   assert.match(html, /2100년 기온 변화/);
@@ -72,7 +77,7 @@ test("event choices show budget, city development, and concentration impact", ()
   assert.match(html, /\.event-choice-metrics[\s\S]*font-size: 14px/);
   assert.match(html, /도시 발전도/);
   assert.match(html, /예산 사용/);
-  assert.match(html, /2100년 온실기체 농도/);
+  assert.match(html, /2100년 온실 기체 농도/);
   assert.match(html, /signedConcentration/);
 });
 

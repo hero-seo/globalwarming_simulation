@@ -85,7 +85,7 @@ export const EVENTS = {
       },
       cleanBuildout: {
         label: "재생에너지와 효율 설비 확대",
-        description: "예산 부담은 크지만 이후 온실기체 농도를 낮추는 데 유리하다.",
+        description: "예산 부담은 크지만 이후 온실 기체 농도를 낮추는 데 유리하다.",
         budget: 8,
         burden: 2,
         renewablesBoost: 1,
