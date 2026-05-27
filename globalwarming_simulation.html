@@ -812,7 +812,7 @@
       const TURN_BUDGET = 40;
       const BORROW_LIMIT_PER_TURN = 12;
       const TOTAL_BORROW_LIMIT = 24;
-      const MAINTENANCE_RATE = 0.5;
+      const MAINTENANCE_RATE = 0.25;
       const roles = {
         environment: "환경부",
         economy: "경제부",
@@ -1066,7 +1066,7 @@
           <article class="policy-card" data-policy-card="${key}">
             <div class="policy-head"><strong data-policy-label>${policy.label}</strong><output class="level" data-policy-level>${game.draft[key]}</output></div>
             <p data-policy-hint>${policy.hint}</p>
-            <p data-policy-budget style="margin:0;font-size:12px;color:var(--muted);"><span data-policy-budget-label>예산 사용</span> <strong data-policy-budget-value></strong> <span data-policy-budget-rate style="opacity:.7"></span></p>
+            <p data-policy-dev style="margin:0;font-size:12px;color:var(--muted);">도시 발전도 <strong data-policy-dev-value></strong> <span data-policy-dev-rate style="opacity:.7"></span> · <span data-policy-budget-label>예산 사용</span> <strong data-policy-budget-value></strong> <span data-policy-budget-rate style="opacity:.7"></span></p>
             <input aria-label="${policy.label}" data-slider="${key}" type="range" min="0" max="4" step="1" value="${level}">
             <div class="approval-row" data-policy-approvals></div>
           </article>
@@ -1110,9 +1110,14 @@
           if (!card) return;
           const level = game.draft[key];
           const approvals = game.approvals[key] ?? [];
+          const devDelta = policy.development * level;
           const budgetInfo = policyBudgetInfo(key, policy, level);
+          const devColor = devDelta > 0 ? "var(--mint)" : devDelta < 0 ? "var(--red)" : "var(--muted)";
+          const devText = devDelta > 0 ? `+${devDelta}` : `${devDelta}`;
           const levelEl = card.querySelector("[data-policy-level]");
           const hintEl = card.querySelector("[data-policy-hint]");
+          const devValueEl = card.querySelector("[data-policy-dev-value]");
+          const devRateEl = card.querySelector("[data-policy-dev-rate]");
           const budgetLabelEl = card.querySelector("[data-policy-budget-label]");
           const budgetValueEl = card.querySelector("[data-policy-budget-value]");
           const budgetRateEl = card.querySelector("[data-policy-budget-rate]");
@@ -1121,6 +1126,13 @@
 
           if (levelEl) levelEl.textContent = level;
           if (hintEl) hintEl.textContent = policy.hint;
+          if (devValueEl) {
+            devValueEl.style.color = devColor;
+            devValueEl.textContent = devDelta !== 0 ? devText : "없음";
+          }
+          if (devRateEl) {
+            devRateEl.textContent = `(레벨당 ${policy.development > 0 ? "+" : ""}${policy.development})`;
+          }
           if (budgetLabelEl) {
             budgetLabelEl.textContent = budgetInfo.label;
           }
@@ -1161,7 +1173,7 @@
         return {
           label: "유지비",
           cost: maintained * policy.budget * MAINTENANCE_RATE,
-          rateText: `(기존 레벨 50%)`
+          rateText: `(기존 레벨 25%)`
         };
       }
 
