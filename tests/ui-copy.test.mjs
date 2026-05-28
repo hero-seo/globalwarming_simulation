@@ -51,6 +51,17 @@ test("policy cards show budget cost beside development impact", () => {
   assert.match(html, /policy\.budget/);
 });
 
+test("city facility graphics keep the highest built policy level", () => {
+  assert.match(html, /function visualPeakPolicies\(\)/);
+  assert.match(html, /function cityMood\(final, active, visualActive = active\)/);
+  assert.match(html, /drawCity\(els\.cityCanvas, cityMood\(final, currentCommittedPolicies\(\), visualPeakPolicies\(\)\), game\.cityName\)/);
+  assert.match(html, /drawCity\(buffer, cityMood\(final, currentCommittedPolicies\(\), visualPeakPolicies\(\)\), game\.cityName\)/);
+});
+
+test("factory smoke disappears from fossil reduction level two", () => {
+  assert.match(html, /mood\.pollution > 0\.5/);
+});
+
 test("approval limit copy says approval count exceeded", () => {
   assert.match(html, /승인 횟수 초과/);
   assert.doesNotMatch(html, /한도초과/);
